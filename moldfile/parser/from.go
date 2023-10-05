@@ -18,7 +18,7 @@ type fromInstruction struct {
 	fromString     *fromString
 	imageInfo      *imageInfo
 	buildStageInfo optional.Of[*buildStageInfo]
-	platformArg    optional.Of[*platformArg]
+	platformFlag   optional.Of[*platformFlag]
 }
 
 type fromInstructionElement interface {
@@ -53,14 +53,16 @@ type buildStageInfoName struct {
 	rawText string
 }
 
-type platformArg struct{}
+type platformFlag struct {
+	rawText string
+}
 
 func ParseFromInstruction(r io.Reader) (FromInstruction, error) {
 	instruction := &fromInstruction{
 		elements:       make([]fromInstructionElement, 0),
 		imageInfo:      nil,
 		buildStageInfo: optional.Of[*buildStageInfo]{},
-		platformArg:    optional.Of[*platformArg]{},
+		platformFlag:   optional.Of[*platformFlag]{},
 	}
 
 	buffer := new(bytes.Buffer)
@@ -132,8 +134,18 @@ func (f *fromInstruction) treatFromInstructionElement(scanner *bufio.Scanner, bu
 		return nil
 	}
 
-	if strings.HasPrefix(buffer.String(), "--platform=") {
-		// TODO
+	if strings.HasPrefix(s, "--platform=") {
+		element := &platformFlag{
+			rawText: s,
+		}
+
+		f.appendElement(element)
+		f.platformFlag = optional.NewWithValue(element)
+
+		buffer.Reset()
+		appendCurrentByte()
+
+		return nil
 	}
 
 	if f.imageInfo == nil {
@@ -256,6 +268,7 @@ func (f *fromInstruction) appendElement(element fromInstructionElement) {
 func (f *fromString) implFromInstructionElement()     {}
 func (i *imageInfo) implFromInstructionElement()      {}
 func (b *buildStageInfo) implFromInstructionElement() {}
+func (p *platformFlag) implFromInstructionElement()   {}
 func (s *space) implFromInstructionElement()          {}
 func (n *newlineChar) implFromInstructionElement()    {}
 

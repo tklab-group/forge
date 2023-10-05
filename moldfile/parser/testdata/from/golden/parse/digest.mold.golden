@@ -16,5 +16,5 @@
         digest: optional.Of[string]{value:"sha256:b4b521bfcec90b11d2869e00fe1f2380c21cbfcd799ee35df8bd7ac09e6f63ea", valid:true},
     },
     buildStageInfo: optional.Of[*github.com/tklab-group/forge/moldfile/parser.buildStageInfo]{},
-    platformArg:    optional.Of[*github.com/tklab-group/forge/moldfile/parser.platformArg]{},
+    platformFlag:   optional.Of[*github.com/tklab-group/forge/moldfile/parser.platformFlag]{},
 }

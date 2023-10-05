@@ -50,6 +50,12 @@ func TestParseFromInstruction(t *testing.T) {
 			isError:  false,
 			err:      nil,
 		},
+		{
+			name:     "with platform flag",
+			fileName: "platform.mold",
+			isError:  false,
+			err:      nil,
+		},
 	}
 
 	g := goldie.New(t, goldie.WithFixtureDir(path.Join(goldenFileDir, "parse")))

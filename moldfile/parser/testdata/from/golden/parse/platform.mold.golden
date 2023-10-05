@@ -2,12 +2,13 @@
     elements: {
         &parser.fromString{rawText:"FROM"},
         &parser.space{rawText:" "},
+        &parser.platformFlag{rawText:"--platform=linux/amd64"},
+        &parser.space{rawText:" "},
         &parser.imageInfo{
             name:   "ubuntu",
             tag:    optional.Of[string]{value:"latest", valid:true},
             digest: optional.Of[string]{},
         },
-        &parser.newlineChar{rawText:"\n"},
     },
     fromString: &parser.fromString{rawText:"FROM"},
     imageInfo:  &parser.imageInfo{
@@ -16,5 +17,8 @@
         digest: optional.Of[string]{},
     },
     buildStageInfo: optional.Of[*github.com/tklab-group/forge/moldfile/parser.buildStageInfo]{},
-    platformFlag:   optional.Of[*github.com/tklab-group/forge/moldfile/parser.platformFlag]{},
+    platformFlag:   optional.Of[*github.com/tklab-group/forge/moldfile/parser.platformFlag]{
+        value: &parser.platformFlag{rawText:"--platform=linux/amd64"},
+        valid: true,
+    },
 }

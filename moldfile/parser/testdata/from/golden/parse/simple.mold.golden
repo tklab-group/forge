@@ -16,5 +16,5 @@
         digest: optional.Of[string]{},
     },
     buildStageInfo: optional.Of[*github.com/tklab-group/forge/moldfile/parser.buildStageInfo]{},
-    platformArg:    optional.Of[*github.com/tklab-group/forge/moldfile/parser.platformArg]{},
+    platformFlag:   optional.Of[*github.com/tklab-group/forge/moldfile/parser.platformFlag]{},
 }
