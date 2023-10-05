@@ -17,7 +17,7 @@ type fromInstruction struct {
 	elements       []fromInstructionElement
 	fromString     *fromString
 	imageInfo      *imageInfo
-	buildStageName optional.Of[*buildStageName]
+	buildStageInfo optional.Of[*buildStageInfo]
 	platformArg    optional.Of[*platformArg]
 }
 
@@ -35,7 +35,22 @@ type imageInfo struct {
 	digest optional.Of[string]
 }
 
-type buildStageName struct {
+type buildStageInfo struct {
+	elements []buildStageInfoElement
+	asString *buildStageInfoAsString
+	name     *buildStageInfoName
+}
+
+type buildStageInfoElement interface {
+	implBuildStageInfoElement()
+}
+
+type buildStageInfoAsString struct {
+	rawText string
+}
+
+type buildStageInfoName struct {
+	rawText string
 }
 
 type platformArg struct{}
@@ -44,7 +59,7 @@ func ParseFromInstruction(r io.Reader) (FromInstruction, error) {
 	instruction := &fromInstruction{
 		elements:       make([]fromInstructionElement, 0),
 		imageInfo:      nil,
-		buildStageName: optional.Of[*buildStageName]{},
+		buildStageInfo: optional.Of[*buildStageInfo]{},
 		platformArg:    optional.Of[*platformArg]{},
 	}
 
@@ -150,7 +165,78 @@ func (f *fromInstruction) treatFromInstructionElement(scanner *bufio.Scanner, bu
 		return nil
 	}
 
-	// TODO: buildStageName
+	// Parse `AS {buildStageName}`
+	if strings.ToLower(s) == "as" && !f.buildStageInfo.HasValue() {
+		if !isSpace(currentByte) {
+			return fmt.Errorf("unexpected token to parse buildStageInfo: %v", currentByte)
+		}
+
+		info := &buildStageInfo{
+			elements: make([]buildStageInfoElement, 0),
+			asString: nil,
+			name:     nil,
+		}
+
+		asString := &buildStageInfoAsString{rawText: s}
+		info.elements = append(info.elements, asString)
+		info.asString = asString
+
+		info.elements = append(info.elements, newSpaceFromByte(currentByte))
+
+		buildStageBuff := new(bytes.Buffer)
+
+		// Read all spaces between "AS" and the stage name
+		for scanner.Scan() {
+			b := scanner.Bytes()
+
+			if isNewlineChar(b) {
+				return fmt.Errorf("unexpected newline code to parse buildStageInfo")
+			}
+
+			if isSpace(b) {
+				info.elements = append(info.elements, newNewlineCharFromByte(b))
+			} else {
+				_, err := buildStageBuff.Write(b)
+				if err != nil {
+					return fmt.Errorf("failed to write to buffer: %v", err)
+				}
+				break
+			}
+		}
+
+		var lastElement buildStageInfoElement
+		for scanner.Scan() {
+			b := scanner.Bytes()
+
+			if isNewlineChar(b) {
+				lastElement = newNewlineCharFromByte(b)
+				break
+			}
+			if isSpace(b) {
+				lastElement = newSpaceFromByte(b)
+				break
+			}
+
+			_, err := buildStageBuff.Write(b)
+			if err != nil {
+				return fmt.Errorf("failed to write to buffer: %v", err)
+			}
+		}
+
+		name := &buildStageInfoName{
+			rawText: buildStageBuff.String(),
+		}
+		info.elements = append(info.elements, name)
+		info.name = name
+
+		info.elements = append(info.elements, lastElement)
+
+		f.appendElement(info)
+		f.buildStageInfo = optional.NewWithValue(info)
+
+		buffer.Reset()
+		return nil
+	}
 
 	return fmt.Errorf("unexpected format")
 }
@@ -159,10 +245,13 @@ func (f *fromInstruction) appendElement(element fromInstructionElement) {
 	f.elements = append(f.elements, element)
 }
 
-func (f *fromString) implFromInstructionElement() {}
+func (f *fromString) implFromInstructionElement()     {}
+func (i *imageInfo) implFromInstructionElement()      {}
+func (b *buildStageInfo) implFromInstructionElement() {}
+func (s *space) implFromInstructionElement()          {}
+func (n *newlineChar) implFromInstructionElement()    {}
 
-func (i *imageInfo) implFromInstructionElement() {}
-
-func (s *space) implFromInstructionElement() {}
-
-func (n *newlineChar) implFromInstructionElement() {}
+func (b *buildStageInfoAsString) implBuildStageInfoElement() {}
+func (b *buildStageInfoName) implBuildStageInfoElement()     {}
+func (s *space) implBuildStageInfoElement()                  {}
+func (n *newlineChar) implBuildStageInfoElement()            {}

@@ -1,0 +1,42 @@
+&parser.fromInstruction{
+    elements: {
+        &parser.fromString{rawText:"FROM"},
+        &parser.space{rawText:" "},
+        &parser.imageInfo{
+            name:   "ubuntu",
+            tag:    optional.Of[string]{value:"latest", valid:true},
+            digest: optional.Of[string]{},
+        },
+        &parser.space{rawText:" "},
+        &parser.buildStageInfo{
+            elements: {
+                &parser.buildStageInfoAsString{rawText:"AS"},
+                &parser.space{rawText:" "},
+                &parser.buildStageInfoName{rawText:"builder"},
+                &parser.newlineChar{rawText:"\n"},
+            },
+            asString: &parser.buildStageInfoAsString{rawText:"AS"},
+            name:     &parser.buildStageInfoName{rawText:"builder"},
+        },
+    },
+    fromString: &parser.fromString{rawText:"FROM"},
+    imageInfo:  &parser.imageInfo{
+        name:   "ubuntu",
+        tag:    optional.Of[string]{value:"latest", valid:true},
+        digest: optional.Of[string]{},
+    },
+    buildStageInfo: optional.Of[*github.com/tklab-group/forge/moldfile/parser.buildStageInfo]{
+        value: &parser.buildStageInfo{
+            elements: {
+                &parser.buildStageInfoAsString{rawText:"AS"},
+                &parser.space{rawText:" "},
+                &parser.buildStageInfoName{rawText:"builder"},
+                &parser.newlineChar{rawText:"\n"},
+            },
+            asString: &parser.buildStageInfoAsString{rawText:"AS"},
+            name:     &parser.buildStageInfoName{rawText:"builder"},
+        },
+        valid: true,
+    },
+    platformArg: optional.Of[*github.com/tklab-group/forge/moldfile/parser.platformArg]{},
+}

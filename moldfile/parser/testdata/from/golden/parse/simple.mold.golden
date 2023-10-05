@@ -15,6 +15,6 @@
         tag:    optional.Of[string]{},
         digest: optional.Of[string]{},
     },
-    buildStageName: optional.Of[*github.com/tklab-group/forge/moldfile/parser.buildStageName]{},
+    buildStageInfo: optional.Of[*github.com/tklab-group/forge/moldfile/parser.buildStageInfo]{},
     platformArg:    optional.Of[*github.com/tklab-group/forge/moldfile/parser.platformArg]{},
 }
