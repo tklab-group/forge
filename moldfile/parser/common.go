@@ -1,6 +1,9 @@
 package parser
 
-import "bytes"
+import (
+	"bytes"
+	"strings"
+)
 
 // space includes single space (" ") or tab ("\t")
 type space struct {
@@ -43,4 +46,17 @@ func newRawTextContainer(s string) rawTextContainer {
 
 func (r *rawTextContainer) toString() string {
 	return r.rawText
+}
+
+type stringfy interface {
+	toString() string
+}
+
+func joinStringfys[T stringfy](stringfys []T) string {
+	list := make([]string, len(stringfys))
+	for i, element := range stringfys {
+		list[i] = element.toString()
+	}
+
+	return strings.Join(list, "")
 }

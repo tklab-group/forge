@@ -79,3 +79,54 @@ func TestParseFromInstruction(t *testing.T) {
 
 	}
 }
+
+func Test_fromInstruction_ToString(t *testing.T) {
+	tests := []struct {
+		name     string
+		fileName string
+	}{
+		{
+			name:     "simple",
+			fileName: "simple.mold",
+		},
+		{
+			name:     "lowercase FROM",
+			fileName: "lowercase.mold",
+		},
+		{
+			name:     "image with tag",
+			fileName: "tag.mold",
+		},
+		{
+			name:     "image with digest",
+			fileName: "digest.mold",
+		},
+		{
+			name:     "with stage name",
+			fileName: "stagename.mold",
+		},
+		{
+			name:     "with platform flag",
+			fileName: "platform.mold",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			filePath := path.Join(testDataDir, test.fileName)
+			f, err := os.Open(filePath)
+			defer f.Close()
+			require.NoError(t, err)
+
+			instruction, err := ParseFromInstruction(f)
+			require.NoError(t, err)
+
+			got := instruction.ToString()
+
+			expected, err := os.ReadFile(filePath)
+			require.NoError(t, err)
+
+			assert.Equal(t, string(expected), got)
+		})
+	}
+}

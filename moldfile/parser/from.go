@@ -11,6 +11,8 @@ import (
 )
 
 type FromInstruction interface {
+	stringfy
+	ToString() string
 }
 
 type fromInstruction struct {
@@ -23,6 +25,7 @@ type fromInstruction struct {
 
 type fromInstructionElement interface {
 	implFromInstructionElement()
+	stringfy
 }
 
 type fromString struct {
@@ -43,6 +46,7 @@ type buildStageInfo struct {
 
 type buildStageInfoElement interface {
 	implBuildStageInfoElement()
+	stringfy
 }
 
 type buildStageInfoAsString struct {
@@ -265,6 +269,28 @@ func (f *fromInstruction) parseBuildStageInfo(scanner *bufio.Scanner, buffer *by
 
 func (f *fromInstruction) appendElement(element fromInstructionElement) {
 	f.elements = append(f.elements, element)
+}
+
+func (f *fromInstruction) ToString() string {
+	return f.toString()
+}
+
+func (f *fromInstruction) toString() string {
+	return joinStringfys(f.elements)
+}
+
+func (i *imageInfo) toString() string {
+	if i.digest.HasValue() {
+		return strings.Join([]string{i.name, "@", i.digest.ValueOrZero()}, "")
+	} else if i.tag.HasValue() {
+		return strings.Join([]string{i.name, ":", i.tag.ValueOrZero()}, "")
+	}
+
+	return i.name
+}
+
+func (b *buildStageInfo) toString() string {
+	return joinStringfys(b.elements)
 }
 
 func (f *fromString) implFromInstructionElement()     {}
