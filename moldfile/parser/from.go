@@ -26,7 +26,7 @@ type fromInstructionElement interface {
 }
 
 type fromString struct {
-	rawText string
+	rawTextContainer
 }
 
 type imageInfo struct {
@@ -46,15 +46,15 @@ type buildStageInfoElement interface {
 }
 
 type buildStageInfoAsString struct {
-	rawText string
+	rawTextContainer
 }
 
 type buildStageInfoName struct {
-	rawText string
+	rawTextContainer
 }
 
 type platformFlag struct {
-	rawText string
+	rawTextContainer
 }
 
 func ParseFromInstruction(r io.Reader) (FromInstruction, error) {
@@ -123,7 +123,7 @@ func (f *fromInstruction) treatFromInstructionElement(scanner *bufio.Scanner, bu
 
 	if strings.ToLower(s) == "from" && f.fromString == nil {
 		element := &fromString{
-			rawText: s,
+			newRawTextContainer(s),
 		}
 		f.appendElement(element)
 		f.fromString = element
@@ -136,7 +136,7 @@ func (f *fromInstruction) treatFromInstructionElement(scanner *bufio.Scanner, bu
 
 	if strings.HasPrefix(s, "--platform=") {
 		element := &platformFlag{
-			rawText: s,
+			newRawTextContainer(s),
 		}
 
 		f.appendElement(element)
@@ -200,7 +200,9 @@ func (f *fromInstruction) parseBuildStageInfo(scanner *bufio.Scanner, buffer *by
 		name:     nil,
 	}
 
-	asString := &buildStageInfoAsString{rawText: s}
+	asString := &buildStageInfoAsString{
+		newRawTextContainer(s),
+	}
 	info.elements = append(info.elements, asString)
 	info.asString = asString
 
@@ -247,7 +249,7 @@ func (f *fromInstruction) parseBuildStageInfo(scanner *bufio.Scanner, buffer *by
 	}
 
 	name := &buildStageInfoName{
-		rawText: buildStageBuff.String(),
+		newRawTextContainer(buildStageBuff.String()),
 	}
 	info.elements = append(info.elements, name)
 	info.name = name

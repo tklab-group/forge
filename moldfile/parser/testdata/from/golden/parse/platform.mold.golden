@@ -1,24 +1,36 @@
 &parser.fromInstruction{
     elements: {
-        &parser.fromString{rawText:"FROM"},
-        &parser.space{rawText:" "},
-        &parser.platformFlag{rawText:"--platform=linux/amd64"},
-        &parser.space{rawText:" "},
+        &parser.fromString{
+            rawTextContainer: parser.rawTextContainer{rawText:"FROM"},
+        },
+        &parser.space{
+            rawTextContainer: parser.rawTextContainer{rawText:" "},
+        },
+        &parser.platformFlag{
+            rawTextContainer: parser.rawTextContainer{rawText:"--platform=linux/amd64"},
+        },
+        &parser.space{
+            rawTextContainer: parser.rawTextContainer{rawText:" "},
+        },
         &parser.imageInfo{
             name:   "ubuntu",
             tag:    optional.Of[string]{value:"latest", valid:true},
             digest: optional.Of[string]{},
         },
     },
-    fromString: &parser.fromString{rawText:"FROM"},
-    imageInfo:  &parser.imageInfo{
+    fromString: &parser.fromString{
+        rawTextContainer: parser.rawTextContainer{rawText:"FROM"},
+    },
+    imageInfo: &parser.imageInfo{
         name:   "ubuntu",
         tag:    optional.Of[string]{value:"latest", valid:true},
         digest: optional.Of[string]{},
     },
     buildStageInfo: optional.Of[*github.com/tklab-group/forge/moldfile/parser.buildStageInfo]{},
     platformFlag:   optional.Of[*github.com/tklab-group/forge/moldfile/parser.platformFlag]{
-        value: &parser.platformFlag{rawText:"--platform=linux/amd64"},
+        value: &parser.platformFlag{
+            rawTextContainer: parser.rawTextContainer{rawText:"--platform=linux/amd64"},
+        },
         valid: true,
     },
 }

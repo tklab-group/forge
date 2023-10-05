@@ -4,7 +4,7 @@ import "bytes"
 
 // space includes single space (" ") or tab ("\t")
 type space struct {
-	rawText string
+	rawTextContainer
 }
 
 func isSpace(b []byte) bool {
@@ -13,12 +13,12 @@ func isSpace(b []byte) bool {
 
 func newSpaceFromByte(b []byte) *space {
 	return &space{
-		rawText: string(b),
+		newRawTextContainer(string(b)),
 	}
 }
 
 type newlineChar struct {
-	rawText string
+	rawTextContainer
 }
 
 func isNewlineChar(b []byte) bool {
@@ -27,6 +27,20 @@ func isNewlineChar(b []byte) bool {
 }
 func newNewlineCharFromByte(b []byte) *newlineChar {
 	return &newlineChar{
-		rawText: string(b),
+		newRawTextContainer(string(b)),
 	}
+}
+
+type rawTextContainer struct {
+	rawText string
+}
+
+func newRawTextContainer(s string) rawTextContainer {
+	return rawTextContainer{
+		rawText: s,
+	}
+}
+
+func (r *rawTextContainer) toString() string {
+	return r.rawText
 }

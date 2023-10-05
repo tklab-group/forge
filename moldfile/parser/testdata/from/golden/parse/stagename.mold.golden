@@ -1,26 +1,46 @@
 &parser.fromInstruction{
     elements: {
-        &parser.fromString{rawText:"FROM"},
-        &parser.space{rawText:" "},
+        &parser.fromString{
+            rawTextContainer: parser.rawTextContainer{rawText:"FROM"},
+        },
+        &parser.space{
+            rawTextContainer: parser.rawTextContainer{rawText:" "},
+        },
         &parser.imageInfo{
             name:   "ubuntu",
             tag:    optional.Of[string]{value:"latest", valid:true},
             digest: optional.Of[string]{},
         },
-        &parser.space{rawText:" "},
+        &parser.space{
+            rawTextContainer: parser.rawTextContainer{rawText:" "},
+        },
         &parser.buildStageInfo{
             elements: {
-                &parser.buildStageInfoAsString{rawText:"AS"},
-                &parser.space{rawText:" "},
-                &parser.buildStageInfoName{rawText:"builder"},
-                &parser.newlineChar{rawText:"\n"},
+                &parser.buildStageInfoAsString{
+                    rawTextContainer: parser.rawTextContainer{rawText:"AS"},
+                },
+                &parser.space{
+                    rawTextContainer: parser.rawTextContainer{rawText:" "},
+                },
+                &parser.buildStageInfoName{
+                    rawTextContainer: parser.rawTextContainer{rawText:"builder"},
+                },
+                &parser.newlineChar{
+                    rawTextContainer: parser.rawTextContainer{rawText:"\n"},
+                },
             },
-            asString: &parser.buildStageInfoAsString{rawText:"AS"},
-            name:     &parser.buildStageInfoName{rawText:"builder"},
+            asString: &parser.buildStageInfoAsString{
+                rawTextContainer: parser.rawTextContainer{rawText:"AS"},
+            },
+            name: &parser.buildStageInfoName{
+                rawTextContainer: parser.rawTextContainer{rawText:"builder"},
+            },
         },
     },
-    fromString: &parser.fromString{rawText:"FROM"},
-    imageInfo:  &parser.imageInfo{
+    fromString: &parser.fromString{
+        rawTextContainer: parser.rawTextContainer{rawText:"FROM"},
+    },
+    imageInfo: &parser.imageInfo{
         name:   "ubuntu",
         tag:    optional.Of[string]{value:"latest", valid:true},
         digest: optional.Of[string]{},
@@ -28,13 +48,25 @@
     buildStageInfo: optional.Of[*github.com/tklab-group/forge/moldfile/parser.buildStageInfo]{
         value: &parser.buildStageInfo{
             elements: {
-                &parser.buildStageInfoAsString{rawText:"AS"},
-                &parser.space{rawText:" "},
-                &parser.buildStageInfoName{rawText:"builder"},
-                &parser.newlineChar{rawText:"\n"},
+                &parser.buildStageInfoAsString{
+                    rawTextContainer: parser.rawTextContainer{rawText:"AS"},
+                },
+                &parser.space{
+                    rawTextContainer: parser.rawTextContainer{rawText:" "},
+                },
+                &parser.buildStageInfoName{
+                    rawTextContainer: parser.rawTextContainer{rawText:"builder"},
+                },
+                &parser.newlineChar{
+                    rawTextContainer: parser.rawTextContainer{rawText:"\n"},
+                },
             },
-            asString: &parser.buildStageInfoAsString{rawText:"AS"},
-            name:     &parser.buildStageInfoName{rawText:"builder"},
+            asString: &parser.buildStageInfoAsString{
+                rawTextContainer: parser.rawTextContainer{rawText:"AS"},
+            },
+            name: &parser.buildStageInfoName{
+                rawTextContainer: parser.rawTextContainer{rawText:"builder"},
+            },
         },
         valid: true,
     },

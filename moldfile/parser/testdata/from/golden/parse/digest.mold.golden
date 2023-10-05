@@ -1,16 +1,24 @@
 &parser.fromInstruction{
     elements: {
-        &parser.fromString{rawText:"FROM"},
-        &parser.space{rawText:" "},
+        &parser.fromString{
+            rawTextContainer: parser.rawTextContainer{rawText:"FROM"},
+        },
+        &parser.space{
+            rawTextContainer: parser.rawTextContainer{rawText:" "},
+        },
         &parser.imageInfo{
             name:   "ubuntu",
             tag:    optional.Of[string]{},
             digest: optional.Of[string]{value:"sha256:b4b521bfcec90b11d2869e00fe1f2380c21cbfcd799ee35df8bd7ac09e6f63ea", valid:true},
         },
-        &parser.newlineChar{rawText:"\n"},
+        &parser.newlineChar{
+            rawTextContainer: parser.rawTextContainer{rawText:"\n"},
+        },
     },
-    fromString: &parser.fromString{rawText:"FROM"},
-    imageInfo:  &parser.imageInfo{
+    fromString: &parser.fromString{
+        rawTextContainer: parser.rawTextContainer{rawText:"FROM"},
+    },
+    imageInfo: &parser.imageInfo{
         name:   "ubuntu",
         tag:    optional.Of[string]{},
         digest: optional.Of[string]{value:"sha256:b4b521bfcec90b11d2869e00fe1f2380c21cbfcd799ee35df8bd7ac09e6f63ea", valid:true},

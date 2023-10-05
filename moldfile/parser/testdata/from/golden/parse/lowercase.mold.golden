@@ -1,15 +1,21 @@
 &parser.fromInstruction{
     elements: {
-        &parser.fromString{rawText:"from"},
-        &parser.space{rawText:" "},
+        &parser.fromString{
+            rawTextContainer: parser.rawTextContainer{rawText:"from"},
+        },
+        &parser.space{
+            rawTextContainer: parser.rawTextContainer{rawText:" "},
+        },
         &parser.imageInfo{
             name:   "ubuntu",
             tag:    optional.Of[string]{},
             digest: optional.Of[string]{},
         },
     },
-    fromString: &parser.fromString{rawText:"from"},
-    imageInfo:  &parser.imageInfo{
+    fromString: &parser.fromString{
+        rawTextContainer: parser.rawTextContainer{rawText:"from"},
+    },
+    imageInfo: &parser.imageInfo{
         name:   "ubuntu",
         tag:    optional.Of[string]{},
         digest: optional.Of[string]{},
