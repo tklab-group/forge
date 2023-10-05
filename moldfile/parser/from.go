@@ -4,9 +4,10 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"github.com/tklab-group/forge/util/optional"
 	"io"
 	"strings"
+
+	"github.com/tklab-group/forge/util/optional"
 )
 
 type FromInstruction interface {

@@ -1,0 +1,20 @@
+&parser.fromInstruction{
+    elements: {
+        &parser.fromString{rawText:"FROM"},
+        &parser.space{rawText:" "},
+        &parser.imageInfo{
+            name:   "ubuntu",
+            tag:    optional.Of[string]{},
+            digest: optional.Of[string]{},
+        },
+        &parser.newlineChar{rawText:"\n"},
+    },
+    fromString: &parser.fromString{rawText:"FROM"},
+    imageInfo:  &parser.imageInfo{
+        name:   "ubuntu",
+        tag:    optional.Of[string]{},
+        digest: optional.Of[string]{},
+    },
+    buildStageName: optional.Of[*github.com/tklab-group/forge/moldfile/parser.buildStageName]{},
+    platformArg:    optional.Of[*github.com/tklab-group/forge/moldfile/parser.platformArg]{},
+}
