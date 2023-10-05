@@ -167,78 +167,86 @@ func (f *fromInstruction) treatFromInstructionElement(scanner *bufio.Scanner, bu
 
 	// Parse `AS {buildStageName}`
 	if strings.ToLower(s) == "as" && !f.buildStageInfo.HasValue() {
-		if !isSpace(currentByte) {
-			return fmt.Errorf("unexpected token to parse buildStageInfo: %v", currentByte)
+		err := f.parseBuildStageInfo(scanner, buffer, currentByte, s)
+		if err != nil {
+			return fmt.Errorf("failed to parse buildStageInfo: %v", err)
 		}
-
-		info := &buildStageInfo{
-			elements: make([]buildStageInfoElement, 0),
-			asString: nil,
-			name:     nil,
-		}
-
-		asString := &buildStageInfoAsString{rawText: s}
-		info.elements = append(info.elements, asString)
-		info.asString = asString
-
-		info.elements = append(info.elements, newSpaceFromByte(currentByte))
-
-		buildStageBuff := new(bytes.Buffer)
-
-		// Read all spaces between "AS" and the stage name
-		for scanner.Scan() {
-			b := scanner.Bytes()
-
-			if isNewlineChar(b) {
-				return fmt.Errorf("unexpected newline code to parse buildStageInfo")
-			}
-
-			if isSpace(b) {
-				info.elements = append(info.elements, newNewlineCharFromByte(b))
-			} else {
-				_, err := buildStageBuff.Write(b)
-				if err != nil {
-					return fmt.Errorf("failed to write to buffer: %v", err)
-				}
-				break
-			}
-		}
-
-		var lastElement buildStageInfoElement
-		for scanner.Scan() {
-			b := scanner.Bytes()
-
-			if isNewlineChar(b) {
-				lastElement = newNewlineCharFromByte(b)
-				break
-			}
-			if isSpace(b) {
-				lastElement = newSpaceFromByte(b)
-				break
-			}
-
-			_, err := buildStageBuff.Write(b)
-			if err != nil {
-				return fmt.Errorf("failed to write to buffer: %v", err)
-			}
-		}
-
-		name := &buildStageInfoName{
-			rawText: buildStageBuff.String(),
-		}
-		info.elements = append(info.elements, name)
-		info.name = name
-
-		info.elements = append(info.elements, lastElement)
-
-		f.appendElement(info)
-		f.buildStageInfo = optional.NewWithValue(info)
-
-		buffer.Reset()
 		return nil
 	}
 
 	return fmt.Errorf("unexpected format")
+}
+
+func (f *fromInstruction) parseBuildStageInfo(scanner *bufio.Scanner, buffer *bytes.Buffer, currentByte []byte, s string) error {
+	if !isSpace(currentByte) {
+		return fmt.Errorf("unexpected token: %v", currentByte)
+	}
+
+	info := &buildStageInfo{
+		elements: make([]buildStageInfoElement, 0),
+		asString: nil,
+		name:     nil,
+	}
+
+	asString := &buildStageInfoAsString{rawText: s}
+	info.elements = append(info.elements, asString)
+	info.asString = asString
+
+	info.elements = append(info.elements, newSpaceFromByte(currentByte))
+
+	buildStageBuff := new(bytes.Buffer)
+
+	// Read all spaces between "AS" and the stage name
+	for scanner.Scan() {
+		b := scanner.Bytes()
+
+		if isNewlineChar(b) {
+			return fmt.Errorf("unexpected newline code")
+		}
+
+		if isSpace(b) {
+			info.elements = append(info.elements, newNewlineCharFromByte(b))
+		} else {
+			_, err := buildStageBuff.Write(b)
+			if err != nil {
+				return fmt.Errorf("failed to write to buffer: %v", err)
+			}
+			break
+		}
+	}
+
+	var lastElement buildStageInfoElement
+	for scanner.Scan() {
+		b := scanner.Bytes()
+
+		if isNewlineChar(b) {
+			lastElement = newNewlineCharFromByte(b)
+			break
+		}
+		if isSpace(b) {
+			lastElement = newSpaceFromByte(b)
+			break
+		}
+
+		_, err := buildStageBuff.Write(b)
+		if err != nil {
+			return fmt.Errorf("failed to write to buffer: %v", err)
+		}
+	}
+
+	name := &buildStageInfoName{
+		rawText: buildStageBuff.String(),
+	}
+	info.elements = append(info.elements, name)
+	info.name = name
+
+	info.elements = append(info.elements, lastElement)
+
+	f.appendElement(info)
+	f.buildStageInfo = optional.NewWithValue(info)
+
+	buffer.Reset()
+	return nil
 }
 
 func (f *fromInstruction) appendElement(element fromInstructionElement) {
