@@ -56,22 +56,18 @@ func ParseFromInstruction(r io.Reader) (FromInstruction, error) {
 	for scanner.Scan() {
 		b := scanner.Bytes()
 		if isSpace(b) {
-			err := instruction.treatFromInstructionElement(scanner, buffer)
+			err := instruction.treatFromInstructionElement(scanner, buffer, b)
 			if err != nil {
 				return nil, fmt.Errorf("failed to parse as fromInstructionElement: %v", err)
 			}
-
-			instruction.appendElement(newSpaceFromByte(b))
 			continue
 		}
 
 		if isNewlineChar(b) {
-			err := instruction.treatFromInstructionElement(scanner, buffer)
+			err := instruction.treatFromInstructionElement(scanner, buffer, b)
 			if err != nil {
 				return nil, fmt.Errorf("failed to parse as fromInstructionElement: %v", err)
 			}
-
-			instruction.appendElement(newNewlineCharFromByte(b))
 
 			// FROM instruction ends with newline
 			break
@@ -83,7 +79,7 @@ func ParseFromInstruction(r io.Reader) (FromInstruction, error) {
 		}
 	}
 
-	err := instruction.treatFromInstructionElement(scanner, buffer)
+	err := instruction.treatFromInstructionElement(scanner, buffer, []byte(""))
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse as fromInstructionElement: %v", err)
 	}
@@ -91,8 +87,18 @@ func ParseFromInstruction(r io.Reader) (FromInstruction, error) {
 	return instruction, nil
 }
 
-func (f *fromInstruction) treatFromInstructionElement(scanner *bufio.Scanner, buffer *bytes.Buffer) error {
+func (f *fromInstruction) treatFromInstructionElement(scanner *bufio.Scanner, buffer *bytes.Buffer, currentByte []byte) error {
+	appendCurrentByte := func() {
+		if isSpace(currentByte) {
+			f.appendElement(newSpaceFromByte(currentByte))
+		}
+		if isNewlineChar(currentByte) {
+			f.appendElement(newNewlineCharFromByte(currentByte))
+		}
+	}
+
 	if buffer.Len() == 0 {
+		appendCurrentByte()
 		return nil
 	}
 
@@ -106,6 +112,7 @@ func (f *fromInstruction) treatFromInstructionElement(scanner *bufio.Scanner, bu
 		f.fromString = element
 
 		buffer.Reset()
+		appendCurrentByte()
 
 		return nil
 	}
@@ -138,6 +145,7 @@ func (f *fromInstruction) treatFromInstructionElement(scanner *bufio.Scanner, bu
 		f.imageInfo = image
 
 		buffer.Reset()
+		appendCurrentByte()
 
 		return nil
 	}
