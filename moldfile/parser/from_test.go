@@ -27,8 +27,20 @@ func TestParseFromInstruction(t *testing.T) {
 			err:      nil,
 		},
 		{
-			name:     "lowercase",
+			name:     "lowercase FROM",
 			fileName: "lowercase.mold",
+			isError:  false,
+			err:      nil,
+		},
+		{
+			name:     "image with tag",
+			fileName: "tag.mold",
+			isError:  false,
+			err:      nil,
+		},
+		{
+			name:     "image with digest",
+			fileName: "digest.mold",
 			isError:  false,
 			err:      nil,
 		},
@@ -50,7 +62,7 @@ func TestParseFromInstruction(t *testing.T) {
 				assert.NoError(t, err)
 			}
 
-			g.Assert(t, test.name, []byte(pretty.Sprint(got)))
+			g.Assert(t, test.fileName, []byte(pretty.Sprint(got)))
 		})
 
 	}
