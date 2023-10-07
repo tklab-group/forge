@@ -34,6 +34,30 @@ func newNewlineCharFromByte(b []byte) *newlineChar {
 	}
 }
 
+type backslash struct {
+	rawTextContainer
+}
+
+func isBackslash(b []byte) bool {
+	return bytes.Equal(b, []byte("\\"))
+}
+
+func newBackslashFromByte(b []byte) *backslash {
+	return &backslash{
+		newRawTextContainer(string(b)),
+	}
+}
+
+type comment struct {
+	rawTextContainer
+}
+
+func newComment(s string) *comment {
+	return &comment{
+		newRawTextContainer(s),
+	}
+}
+
 type rawTextContainer struct {
 	rawText string
 }

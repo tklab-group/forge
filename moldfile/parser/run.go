@@ -1,26 +1,111 @@
 package parser
 
-type runStatement struct {
-	cmds []cmdInstruction
+import (
+	"bufio"
+	"bytes"
+	"fmt"
+	"io"
+	"strings"
+)
+
+type RunInstruction interface {
 }
 
-type cmdInstruction interface{} // TODO: Rename
+type runInstruction struct {
+	elements  []runInstructionElement
+	runString *runString
+}
 
-type cmdSeparator struct{}
+type runInstructionElement interface {
+	implRunInstructionElement()
+}
 
-type cmd struct{}
+type runString struct {
+	rawTextContainer
+}
 
-type cmdNode interface{}
+type packageManagerCmd[T packageInfo] struct {
+	elements []packageManagerCmdElement
+	mainCmd  *packageManagerMainCmd
+	options  []*packageManagerOption
+	subCmd   *packageManagerSubCmd
+	args     []T
+}
 
-type cmdName struct{}
+type packageManagerCmdElement interface {
+	implPackageManagerCmdElement()
+}
 
-type cmdOption struct{}
+type packageManagerMainCmd struct {
+	rawTextContainer
+}
 
-type cmdArg struct{}
+type packageManagerOption struct {
+	rawTextContainer
+}
 
-type cmdInnerComment struct{}
+type packageManagerSubCmd struct {
+	rawTextContainer
+}
 
-type cmdInnerBackSlash struct{}
+type packageInfo interface {
+	implPackageInfo()
+	stringfy
+}
 
-// cmdInnerSpace includes space, \r and \t
-type cmdInnerSpace struct{}
+type otherCmd struct {
+	rawTextContainer
+}
+
+func ParseRunInstruction(r io.Reader) (RunInstruction, error) {
+	instruction := &runInstruction{
+		elements:  make([]runInstructionElement, 0),
+		runString: nil,
+	}
+
+	buffer := new(bytes.Buffer)
+
+	scanner := bufio.NewScanner(r)
+	scanner.Split(bufio.ScanBytes)
+
+	// Parse "RUN"
+	for scanner.Scan() {
+		b := scanner.Bytes()
+
+		if isSpace(b) {
+			s := buffer.String()
+			if strings.ToLower(s) != "run" {
+				return nil, fmt.Errorf("RunInstruction must start with `RUN`. got: %s", s)
+			}
+
+			element := &runString{
+				newRawTextContainer(s),
+			}
+			instruction.appendElement(element)
+			instruction.runString = element
+
+			instruction.appendElement(newSpaceFromByte(b))
+
+			buffer.Reset()
+
+			break
+		}
+
+		_, err := buffer.Write(b)
+		if err != nil {
+			return nil, fmt.Errorf("failed to write to buffer: %v", err)
+		}
+	}
+
+	// Parse commands in RUN statements
+	// TODO
+
+	return instruction, nil
+}
+
+func (r *runInstruction) appendElement(element runInstructionElement) {
+	r.elements = append(r.elements, element)
+}
+
+func (r *runString) implRunInstructionElement() {}
+func (s *space) implRunInstructionElement()     {}
