@@ -122,7 +122,7 @@ func ParseRunInstruction(r io.Reader) (RunInstruction, error) {
 				if slices.Contains(supportedPackageManagerCmd, buffer.String()) {
 
 				} else {
-					
+
 				}
 			}
 		}
