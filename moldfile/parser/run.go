@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"slices"
 	"strings"
 )
 
@@ -53,6 +54,8 @@ type packageInfo interface {
 	stringfy
 }
 
+var supportedPackageManagerCmd = []string{"apt", "apt-get"}
+
 type otherCmd struct {
 	rawTextContainer
 }
@@ -98,9 +101,67 @@ func ParseRunInstruction(r io.Reader) (RunInstruction, error) {
 	}
 
 	// Parse commands in RUN statements
-	// TODO
+	var noStrInCurrentLine bool = false // The first line starts with RUN
+	for scanner.Scan() {
+		b := scanner.Bytes()
+
+		if isCommentSharp(b) && noStrInCurrentLine {
+			comment, err := parseCommentLine(scanner, b)
+			if err != nil {
+				return nil, fmt.Errorf("faild to parse comment line: %v", err)
+			}
+
+			instruction.appendElement(comment)
+		}
+
+		if isSpace(b) {
+			if buffer.Len() == 0 {
+				instruction.appendElement(newSpaceFromByte(b))
+			} else {
+				// TODO: parse command
+				if slices.Contains(supportedPackageManagerCmd, buffer.String()) {
+
+				} else {
+					
+				}
+			}
+		}
+
+		_, err := buffer.Write(b)
+		if err != nil {
+			return nil, err
+		}
+		noStrInCurrentLine = false
+	}
 
 	return instruction, nil
+}
+
+func parseCommentLine(scanner *bufio.Scanner, prevByte []byte) (*comment, error) {
+	commentBuffer := new(bytes.Buffer)
+	_, err := commentBuffer.Write(prevByte)
+	if err != nil {
+		return nil, err
+	}
+
+	for scanner.Scan() {
+		b := scanner.Bytes()
+		if isNewlineChar(b) {
+			_, err = commentBuffer.Write(b)
+			if err != nil {
+				return nil, err
+			}
+
+			return newComment(commentBuffer.String()), nil
+		}
+
+		_, err := commentBuffer.Write(b)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return nil, fmt.Errorf("comment must end with newline. actual: %s", commentBuffer.String())
 }
 
 func (r *runInstruction) appendElement(element runInstructionElement) {
@@ -108,4 +169,5 @@ func (r *runInstruction) appendElement(element runInstructionElement) {
 }
 
 func (r *runString) implRunInstructionElement() {}
+func (c *comment) implRunInstructionElement()   {}
 func (s *space) implRunInstructionElement()     {}

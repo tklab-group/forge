@@ -52,6 +52,10 @@ type comment struct {
 	rawTextContainer
 }
 
+func isCommentSharp(b []byte) bool {
+	return bytes.Equal(b, []byte("#"))
+}
+
 func newComment(s string) *comment {
 	return &comment{
 		newRawTextContainer(s),
