@@ -10,6 +10,8 @@ import (
 )
 
 type RunInstruction interface {
+	stringfy
+	ToString() string
 }
 
 type runInstruction struct {
@@ -19,6 +21,7 @@ type runInstruction struct {
 
 type runInstructionElement interface {
 	implRunInstructionElement()
+	stringfy
 }
 
 type runString struct {
@@ -36,6 +39,7 @@ type packageManagerCmd struct {
 
 type packageManagerCmdElement interface {
 	implPackageManagerCmdElement()
+	stringfy
 }
 
 type packageManagerMainCmd struct {
@@ -281,6 +285,22 @@ func (r *runInstruction) appendElement(element runInstructionElement) {
 
 func (p *packageManagerCmd) appendElement(element packageManagerCmdElement) {
 	p.elements = append(p.elements, element)
+}
+
+func (r *runInstruction) toString() string {
+	return joinStringfys(r.elements)
+}
+
+func (r *runInstruction) ToString() string {
+	return r.toString()
+}
+
+func (pmc *packageManagerCmd) toString() string {
+	return joinStringfys(pmc.elements)
+}
+
+func (p *packageManagerArg) toString() string {
+	return p.packageInfo.toString()
 }
 
 func (r *runString) implRunInstructionElement()         {}

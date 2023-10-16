@@ -55,3 +55,38 @@ func TestParseRunInstruction(t *testing.T) {
 
 	}
 }
+
+func Test_runInstruction_ToString(t *testing.T) {
+	tests := []struct {
+		name     string
+		fileName string
+	}{
+		{
+			name:     "apt simple",
+			fileName: "apt-simple.mold",
+		},
+		{
+			name:     "apt separated with backslash",
+			fileName: "apt-multiline.mold",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			filePath := path.Join(runTestDataDir, test.fileName)
+			f, err := os.Open(filePath)
+			defer f.Close()
+			require.NoError(t, err)
+
+			instruction, err := ParseRunInstruction(f)
+			require.NoError(t, err)
+
+			got := instruction.ToString()
+
+			expected, err := os.ReadFile(filePath)
+			require.NoError(t, err)
+
+			assert.Equal(t, string(expected), got)
+		})
+	}
+}
