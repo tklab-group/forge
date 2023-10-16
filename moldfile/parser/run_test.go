@@ -50,6 +50,12 @@ func TestParseRunInstruction(t *testing.T) {
 			isError:  false,
 			err:      nil,
 		},
+		{
+			name:     "multiple commands with &&",
+			fileName: "multiple-commands.mold",
+			isError:  false,
+			err:      nil,
+		},
 	}
 
 	g := goldie.New(t, goldie.WithFixtureDir(path.Join(runGoldenFileDir, "parse")))
@@ -98,6 +104,10 @@ func Test_runInstruction_ToString(t *testing.T) {
 		{
 			name:     "not package manager command with backslash and comment",
 			fileName: "curl-multiline.mold",
+		},
+		{
+			name:     "multiple commands with &&",
+			fileName: "multiple-commands.mold",
 		},
 	}
 

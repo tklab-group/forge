@@ -147,6 +147,29 @@ func ParseRunInstruction(r io.Reader) (RunInstruction, error) {
 			continue
 		}
 
+		if isNewlineChar(b) {
+			if isBackslashString(buffer.String()) {
+				instruction.appendElement(newBackslash(buffer.String()))
+				buffer.Reset()
+				instruction.appendElement(newNewlineCharFromByte(b))
+				continue
+			}
+
+			if slices.Contains(supportedPackageManagerCmd, buffer.String()) {
+				err := instruction.parsePackageManagerCmd(scanner, buffer, b)
+				if err != nil {
+					return nil, fmt.Errorf("failed to parse as a package manager command: %v", err)
+				}
+			} else {
+				err := instruction.parseOtherCmd(scanner, buffer, b)
+				if err != nil {
+					return nil, fmt.Errorf("failed to pares as an other command: %v", err)
+				}
+			}
+
+			return instruction, nil // RUN instruction must end here
+		}
+
 		_, err := buffer.Write(b)
 		if err != nil {
 			return nil, err
@@ -215,9 +238,15 @@ func (r *runInstruction) parsePackageManagerCmd(scanner *bufio.Scanner, buffer *
 	for scanner.Scan() {
 		b := scanner.Bytes()
 		if isSpace(b) {
-			// TODO: Handle `&&`
-
 			if buffer.Len() != 0 {
+				if isCommandSeparator(buffer.String()) {
+					r.appendElement(newCommandSeparator(buffer.String()))
+					buffer.Reset()
+
+					r.appendElement(newSpaceFromByte(b))
+					return nil // Current command ends here
+				}
+
 				managerCmd.parseElement(buffer.String(), packageInfoParser)
 			}
 
@@ -314,9 +343,18 @@ func (r *runInstruction) parseOtherCmd(scanner *bufio.Scanner, buffer *bytes.Buf
 		b := scanner.Bytes()
 
 		if isSpace(b) {
-			// TODO: Handle `&&`
-
 			if buffer.Len() != 0 {
+				if isCommandSeparator(buffer.String()) {
+					cmd := &otherCmd{newRawTextContainer(builder.String())}
+					r.appendElement(cmd)
+
+					r.appendElement(newCommandSeparator(buffer.String()))
+					buffer.Reset()
+					r.appendElement(newSpaceFromByte(b))
+
+					return nil // Current command ends here
+				}
+
 				_, err = builder.WriteString(buffer.String())
 				if err != nil {
 					return err
@@ -423,6 +461,9 @@ func (p *packageManagerCmd) implRunInstructionElement() {}
 func (o *otherCmd) implRunInstructionElement()          {}
 func (c *comment) implRunInstructionElement()           {}
 func (s *space) implRunInstructionElement()             {}
+func (n *newlineChar) implRunInstructionElement()       {}
+func (b *backslash) implRunInstructionElement()         {}
+func (c *commandSeparator) implRunInstructionElement()  {}
 
 func (p *packageManagerMainCmd) implPackageManagerCmdElement() {}
 func (p *packageManagerOption) implPackageManagerCmdElement()  {}

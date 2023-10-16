@@ -2,6 +2,7 @@ package parser
 
 import (
 	"bytes"
+	"slices"
 	"strings"
 )
 
@@ -54,6 +55,21 @@ func newBackslashFromByte(b []byte) *backslash {
 
 func newBackslash(s string) *backslash {
 	return &backslash{
+		newRawTextContainer(s),
+	}
+}
+
+type commandSeparator struct {
+	rawTextContainer
+}
+
+func isCommandSeparator(s string) bool {
+	separators := []string{"&&"}
+	return slices.Contains(separators, s)
+}
+
+func newCommandSeparator(s string) *commandSeparator {
+	return &commandSeparator{
 		newRawTextContainer(s),
 	}
 }

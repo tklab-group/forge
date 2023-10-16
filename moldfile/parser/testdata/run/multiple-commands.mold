@@ -1,0 +1,5 @@
+RUN apt install -y curl && \
+    curl \
+    # Data source is example.com
+    http://example.com \
+    && apt install -y git
