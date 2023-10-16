@@ -209,6 +209,7 @@ func (r *runInstruction) parsePackageManagerCmd(scanner *bufio.Scanner, buffer *
 	managerCmd.mainCmd = mainCmd
 	managerCmd.appendElement(newSpaceFromByte(currentByte))
 
+	var noStrInCurrentLine bool = false // The first line starts with a package manager command
 	for scanner.Scan() {
 		b := scanner.Bytes()
 		if isSpace(b) {
@@ -228,6 +229,8 @@ func (r *runInstruction) parsePackageManagerCmd(scanner *bufio.Scanner, buffer *
 				managerCmd.appendElement(newBackslash(buffer.String()))
 				managerCmd.appendElement(newNewlineCharFromByte(b))
 				buffer.Reset()
+
+				noStrInCurrentLine = true
 				continue
 			}
 
@@ -237,10 +240,21 @@ func (r *runInstruction) parsePackageManagerCmd(scanner *bufio.Scanner, buffer *
 			return nil // RUN Instruction must end here
 		}
 
+		if isCommentSharp(b) && noStrInCurrentLine {
+			comment, err := parseCommentLine(scanner, b)
+			if err != nil {
+				return fmt.Errorf("failed to parse as a comment line: %v", err)
+			}
+
+			managerCmd.appendElement(comment)
+			continue
+		}
+
 		_, err := buffer.Write(b)
 		if err != nil {
 			return err
 		}
+		noStrInCurrentLine = false
 	}
 
 	// File ends with the RUN instruction
@@ -314,6 +328,7 @@ func (p *packageManagerSubCmd) implPackageManagerCmdElement()  {}
 func (p *packageManagerArg) implPackageManagerCmdElement()     {}
 func (s *space) implPackageManagerCmdElement()                 {}
 func (b *backslash) implPackageManagerCmdElement()             {}
-func (b *newlineChar) implPackageManagerCmdElement()           {}
+func (n *newlineChar) implPackageManagerCmdElement()           {}
+func (c *comment) implPackageManagerCmdElement()               {}
 
 func (a *aptPackageInfo) implPackageInfo() {}

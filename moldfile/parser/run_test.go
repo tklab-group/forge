@@ -32,6 +32,12 @@ func TestParseRunInstruction(t *testing.T) {
 			isError:  false,
 			err:      nil,
 		},
+		{
+			name:     "comment in apt command",
+			fileName: "apt-with-comment.mold",
+			isError:  false,
+			err:      nil,
+		},
 	}
 
 	g := goldie.New(t, goldie.WithFixtureDir(path.Join(runGoldenFileDir, "parse")))
@@ -68,6 +74,10 @@ func Test_runInstruction_ToString(t *testing.T) {
 		{
 			name:     "apt separated with backslash",
 			fileName: "apt-multiline.mold",
+		},
+		{
+			name:     "comment in apt command",
+			fileName: "apt-with-comment.mold",
 		},
 	}
 
