@@ -132,14 +132,16 @@ func ParseRunInstruction(r io.Reader) (RunInstruction, error) {
 			if buffer.Len() == 0 {
 				instruction.appendElement(newSpaceFromByte(b))
 			} else {
-				// TODO: parse command
 				if slices.Contains(supportedPackageManagerCmd, buffer.String()) {
 					err := instruction.parsePackageManagerCmd(scanner, buffer, b)
 					if err != nil {
-						return nil, fmt.Errorf("failed to parse as a package manager command")
+						return nil, fmt.Errorf("failed to parse as a package manager command: %v", err)
 					}
 				} else {
-					// TODO
+					err := instruction.parseOtherCmd(scanner, buffer, b)
+					if err != nil {
+						return nil, fmt.Errorf("failed to pares as an other command: %v", err)
+					}
 				}
 			}
 			continue
@@ -293,6 +295,105 @@ func (pmc *packageManagerCmd) parseElement(s string, packageInfoParser func(s st
 	pmc.packages = append(pmc.packages, packageInfo)
 }
 
+func (r *runInstruction) parseOtherCmd(scanner *bufio.Scanner, buffer *bytes.Buffer, currentByte []byte) error {
+	builder := new(strings.Builder)
+
+	_, err := builder.WriteString(buffer.String())
+	if err != nil {
+		return err
+	}
+	buffer.Reset()
+
+	_, err = builder.Write(currentByte)
+	if err != nil {
+		return err
+	}
+
+	var noStrInCurrentLine bool = false // The first line starts with a command
+	for scanner.Scan() {
+		b := scanner.Bytes()
+
+		if isSpace(b) {
+			// TODO: Handle `&&`
+
+			if buffer.Len() != 0 {
+				_, err = builder.WriteString(buffer.String())
+				if err != nil {
+					return err
+				}
+
+				buffer.Reset()
+			}
+
+			_, err = builder.Write(b)
+			if err != nil {
+				return err
+			}
+
+			continue
+		}
+
+		if isNewlineChar(b) {
+			instructionMustEnd := !isBackslashString(buffer.String())
+
+			_, err = builder.WriteString(buffer.String())
+			if err != nil {
+				return err
+			}
+
+			buffer.Reset()
+
+			_, err = builder.Write(b)
+			if err != nil {
+				return err
+			}
+
+			noStrInCurrentLine = true
+
+			if instructionMustEnd {
+				break
+			} else {
+				continue
+			}
+		}
+
+		if isCommentSharp(b) && noStrInCurrentLine {
+			comment, err := parseCommentLine(scanner, b)
+			if err != nil {
+				return fmt.Errorf("failed to parse as a comment in a command: %v", err)
+			}
+
+			// In otherCmd, comment is also parsed as just a string element in a command
+			_, err = builder.WriteString(comment.toString())
+			if err != nil {
+				return err
+			}
+			continue
+		}
+
+		_, err = buffer.Write(b)
+		if err != nil {
+			return err
+		}
+		noStrInCurrentLine = false
+	}
+
+	// File ends with the RUN instruction
+	if buffer.Len() != 0 {
+		_, err = builder.WriteString(buffer.String())
+		if err != nil {
+			return err
+		}
+
+		buffer.Reset()
+	}
+
+	cmd := &otherCmd{newRawTextContainer(builder.String())}
+	r.appendElement(cmd)
+
+	return nil
+}
+
 func (r *runInstruction) appendElement(element runInstructionElement) {
 	r.elements = append(r.elements, element)
 }
@@ -319,6 +420,7 @@ func (p *packageManagerArg) toString() string {
 
 func (r *runString) implRunInstructionElement()         {}
 func (p *packageManagerCmd) implRunInstructionElement() {}
+func (o *otherCmd) implRunInstructionElement()          {}
 func (c *comment) implRunInstructionElement()           {}
 func (s *space) implRunInstructionElement()             {}
 

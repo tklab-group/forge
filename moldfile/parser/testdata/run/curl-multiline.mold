@@ -1,0 +1,3 @@
+RUN curl \
+    # Data source is example.com
+    http://example.com

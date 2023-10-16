@@ -38,6 +38,18 @@ func TestParseRunInstruction(t *testing.T) {
 			isError:  false,
 			err:      nil,
 		},
+		{
+			name:     "not package manager command",
+			fileName: "curl-simple.mold",
+			isError:  false,
+			err:      nil,
+		},
+		{
+			name:     "not package manager command with backslash and comment",
+			fileName: "curl-multiline.mold",
+			isError:  false,
+			err:      nil,
+		},
 	}
 
 	g := goldie.New(t, goldie.WithFixtureDir(path.Join(runGoldenFileDir, "parse")))
@@ -78,6 +90,14 @@ func Test_runInstruction_ToString(t *testing.T) {
 		{
 			name:     "comment in apt command",
 			fileName: "apt-with-comment.mold",
+		},
+		{
+			name:     "not package manager command",
+			fileName: "curl-simple.mold",
+		},
+		{
+			name:     "not package manager command with backslash and comment",
+			fileName: "curl-multiline.mold",
 		},
 	}
 
