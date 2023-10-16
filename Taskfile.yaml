@@ -4,6 +4,9 @@ tasks:
   test:
     desc: Run tests with go test
     cmd: go test -v ./...
+  test-no-cache:
+    desc: Run tests with go test
+    cmd: go test -v -count=1 ./...
   update-golden-test:
     desc: Update golden testing results
     cmd: go test ./... -update -clean
