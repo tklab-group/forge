@@ -10,8 +10,8 @@ import (
 	"testing"
 )
 
-const testDataDir = "testdata/from"
-const goldenFileDir = "testdata/from/golden"
+const fromTestDataDir = "testdata/from"
+const fromGoldenFileDir = "testdata/from/golden"
 
 func TestParseFromInstruction(t *testing.T) {
 	tests := []struct {
@@ -58,10 +58,10 @@ func TestParseFromInstruction(t *testing.T) {
 		},
 	}
 
-	g := goldie.New(t, goldie.WithFixtureDir(path.Join(goldenFileDir, "parse")))
+	g := goldie.New(t, goldie.WithFixtureDir(path.Join(fromGoldenFileDir, "parse")))
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			f, err := os.Open(path.Join(testDataDir, test.fileName))
+			f, err := os.Open(path.Join(fromTestDataDir, test.fileName))
 			defer f.Close()
 			require.NoError(t, err)
 
@@ -113,7 +113,7 @@ func Test_fromInstruction_ToString(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			filePath := path.Join(testDataDir, test.fileName)
+			filePath := path.Join(fromTestDataDir, test.fileName)
 			f, err := os.Open(filePath)
 			defer f.Close()
 			require.NoError(t, err)

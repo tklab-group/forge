@@ -210,7 +210,9 @@ func (r *runInstruction) parsePackageManagerCmd(scanner *bufio.Scanner, buffer *
 		if isSpace(b) {
 			// TODO: Handle `&&`
 
-			managerCmd.parseElement(buffer.String(), packageInfoParser)
+			if buffer.Len() != 0 {
+				managerCmd.parseElement(buffer.String(), packageInfoParser)
+			}
 
 			managerCmd.appendElement(newSpaceFromByte(b))
 			buffer.Reset()
@@ -235,6 +237,12 @@ func (r *runInstruction) parsePackageManagerCmd(scanner *bufio.Scanner, buffer *
 		if err != nil {
 			return err
 		}
+	}
+
+	// File ends with the RUN instruction
+	if buffer.Len() != 0 {
+		managerCmd.parseElement(buffer.String(), packageInfoParser)
+		buffer.Reset()
 	}
 
 	return nil

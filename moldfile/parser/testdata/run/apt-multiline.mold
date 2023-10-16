@@ -1,0 +1,2 @@
+RUN apt install -y curl \
+        git=1:2.34.1-1ubuntu1.1
