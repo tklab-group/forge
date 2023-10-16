@@ -25,12 +25,13 @@ type runString struct {
 	rawTextContainer
 }
 
-type packageManagerCmd[T packageInfo] struct {
-	elements []packageManagerCmdElement
-	mainCmd  *packageManagerMainCmd
-	options  []*packageManagerOption
-	subCmd   *packageManagerSubCmd
-	args     []T
+type packageManagerCmd struct {
+	elements       []packageManagerCmdElement
+	mainCmd        *packageManagerMainCmd
+	mainCmdOptions []*packageManagerOption
+	subCmd         *packageManagerSubCmd
+	subCmdOptions  []*packageManagerOption
+	packages       []packageInfo
 }
 
 type packageManagerCmdElement interface {
@@ -49,12 +50,20 @@ type packageManagerSubCmd struct {
 	rawTextContainer
 }
 
+type packageManagerArg struct {
+	packageInfo packageInfo
+}
+
 type packageInfo interface {
 	implPackageInfo()
 	stringfy
 }
 
 var supportedPackageManagerCmd = []string{"apt", "apt-get"}
+var packageInfoParseFuncs = map[string]func(s string) packageInfo{
+	"apt":     parseAptPackageInfo,
+	"apt-get": parseAptPackageInfo,
+}
 
 type otherCmd struct {
 	rawTextContainer
@@ -112,6 +121,7 @@ func ParseRunInstruction(r io.Reader) (RunInstruction, error) {
 			}
 
 			instruction.appendElement(comment)
+			continue
 		}
 
 		if isSpace(b) {
@@ -120,11 +130,15 @@ func ParseRunInstruction(r io.Reader) (RunInstruction, error) {
 			} else {
 				// TODO: parse command
 				if slices.Contains(supportedPackageManagerCmd, buffer.String()) {
-
+					err := instruction.parsePackageManagerCmd(scanner, buffer, b)
+					if err != nil {
+						return nil, fmt.Errorf("failed to parse as a package manager command")
+					}
 				} else {
-
+					// TODO
 				}
 			}
+			continue
 		}
 
 		_, err := buffer.Write(b)
@@ -164,10 +178,114 @@ func parseCommentLine(scanner *bufio.Scanner, prevByte []byte) (*comment, error)
 	return nil, fmt.Errorf("comment must end with newline. actual: %s", commentBuffer.String())
 }
 
+func (r *runInstruction) parsePackageManagerCmd(scanner *bufio.Scanner, buffer *bytes.Buffer, currentByte []byte) error {
+	if !(slices.Contains(supportedPackageManagerCmd, buffer.String()) && isSpace(currentByte)) {
+		return fmt.Errorf("unexpected input for parsePackageManagerCmd: `%s%s`", buffer.String(), string(currentByte))
+	}
+
+	packageInfoParser, ok := packageInfoParseFuncs[buffer.String()]
+	if !ok {
+		return fmt.Errorf("no function for parse its args: `%s`", buffer.String())
+	}
+
+	managerCmd := &packageManagerCmd{
+		elements:       make([]packageManagerCmdElement, 0),
+		mainCmd:        nil,
+		mainCmdOptions: make([]*packageManagerOption, 0),
+		subCmd:         nil,
+		subCmdOptions:  make([]*packageManagerOption, 0),
+		packages:       make([]packageInfo, 0),
+	}
+	r.appendElement(managerCmd)
+
+	mainCmd := &packageManagerMainCmd{newRawTextContainer(buffer.String())}
+	buffer.Reset()
+
+	managerCmd.appendElement(mainCmd)
+	managerCmd.mainCmd = mainCmd
+	managerCmd.appendElement(newSpaceFromByte(currentByte))
+
+	for scanner.Scan() {
+		b := scanner.Bytes()
+		if isSpace(b) {
+			// TODO: Handle `&&`
+
+			managerCmd.parseElement(buffer.String(), packageInfoParser)
+
+			managerCmd.appendElement(newSpaceFromByte(b))
+			buffer.Reset()
+			continue
+		}
+
+		if isNewlineChar(b) {
+			if isBackslashString(buffer.String()) {
+				managerCmd.appendElement(newBackslash(buffer.String()))
+				managerCmd.appendElement(newNewlineCharFromByte(b))
+				buffer.Reset()
+				continue
+			}
+
+			managerCmd.parseElement(buffer.String(), packageInfoParser)
+			managerCmd.appendElement(newNewlineCharFromByte(b))
+			buffer.Reset()
+			return nil // RUN Instruction must end here
+		}
+
+		_, err := buffer.Write(b)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (pmc *packageManagerCmd) parseElement(s string, packageInfoParser func(s string) packageInfo) {
+	if strings.HasPrefix(s, "-") {
+		option := &packageManagerOption{rawTextContainer{s}}
+		pmc.appendElement(option)
+
+		if pmc.subCmd == nil {
+			pmc.mainCmdOptions = append(pmc.mainCmdOptions, option)
+		} else {
+			pmc.subCmdOptions = append(pmc.subCmdOptions, option)
+		}
+		return
+	}
+
+	if pmc.subCmd == nil {
+		subCmd := &packageManagerSubCmd{newRawTextContainer(s)}
+		pmc.appendElement(subCmd)
+		pmc.subCmd = subCmd
+
+		return
+	}
+
+	packageInfo := packageInfoParser(s)
+	arg := &packageManagerArg{packageInfo: packageInfo}
+	pmc.appendElement(arg)
+	pmc.packages = append(pmc.packages, packageInfo)
+}
+
 func (r *runInstruction) appendElement(element runInstructionElement) {
 	r.elements = append(r.elements, element)
 }
 
-func (r *runString) implRunInstructionElement() {}
-func (c *comment) implRunInstructionElement()   {}
-func (s *space) implRunInstructionElement()     {}
+func (p *packageManagerCmd) appendElement(element packageManagerCmdElement) {
+	p.elements = append(p.elements, element)
+}
+
+func (r *runString) implRunInstructionElement()         {}
+func (p *packageManagerCmd) implRunInstructionElement() {}
+func (c *comment) implRunInstructionElement()           {}
+func (s *space) implRunInstructionElement()             {}
+
+func (p *packageManagerMainCmd) implPackageManagerCmdElement() {}
+func (p *packageManagerOption) implPackageManagerCmdElement()  {}
+func (p *packageManagerSubCmd) implPackageManagerCmdElement()  {}
+func (p *packageManagerArg) implPackageManagerCmdElement()     {}
+func (s *space) implPackageManagerCmdElement()                 {}
+func (b *backslash) implPackageManagerCmdElement()             {}
+func (b *newlineChar) implPackageManagerCmdElement()           {}
+
+func (a *aptPackageInfo) implPackageInfo() {}

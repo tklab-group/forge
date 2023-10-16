@@ -42,9 +42,19 @@ func isBackslash(b []byte) bool {
 	return bytes.Equal(b, []byte("\\"))
 }
 
+func isBackslashString(s string) bool {
+	return s == "\\"
+}
+
 func newBackslashFromByte(b []byte) *backslash {
 	return &backslash{
 		newRawTextContainer(string(b)),
+	}
+}
+
+func newBackslash(s string) *backslash {
+	return &backslash{
+		newRawTextContainer(s),
 	}
 }
 

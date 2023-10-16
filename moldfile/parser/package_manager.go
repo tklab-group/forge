@@ -11,7 +11,7 @@ type aptPackageInfo struct {
 	version optional.Of[string]
 }
 
-func parseAptPackageInfo(s string) *aptPackageInfo {
+func parseAptPackageInfo(s string) packageInfo {
 	split := strings.Split(s, "=")
 	if len(split) == 2 {
 		return &aptPackageInfo{
