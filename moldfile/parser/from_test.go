@@ -61,6 +61,8 @@ func TestParseFromInstruction(t *testing.T) {
 	g := goldie.New(t, goldie.WithFixtureDir(path.Join(fromGoldenFileDir, "parse")))
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
 			f, err := os.Open(path.Join(fromTestDataDir, test.fileName))
 			defer f.Close()
 			require.NoError(t, err)
@@ -113,6 +115,8 @@ func Test_fromInstruction_ToString(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			
 			filePath := path.Join(fromTestDataDir, test.fileName)
 			f, err := os.Open(filePath)
 			defer f.Close()
