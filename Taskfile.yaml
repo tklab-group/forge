@@ -9,4 +9,4 @@ tasks:
     cmd: go test -v -count=1 ./...
   update-golden-test:
     desc: Update golden testing results
-    cmd: go test ./... -update -clean
+    cmd: go test -update -clean ./... -clean
