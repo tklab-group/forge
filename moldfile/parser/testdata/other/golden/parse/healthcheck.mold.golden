@@ -1,0 +1,3 @@
+&parser.otherInstruction{
+    rawTextContainer: parser.rawTextContainer{rawText:"HEALTHCHECK --interval=5m --timeout=3s \\\n  CMD curl -f http://localhost/ || exit 1\n"},
+}
