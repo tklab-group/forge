@@ -1,25 +1,84 @@
 package parser
 
+import (
+	"bytes"
+	"github.com/moby/buildkit/frontend/dockerfile/command"
+	"io"
+	"strings"
+)
+
 type MoldFile interface {
-	ToString() string
-	TextDiff() string
-	Diff() []string // TODO: Change the return value format
+	stringfy
+	//ToString() string
+	//TextDiff() string
+	//Diff() []string // TODO: Change the return value format
 }
 
 type moldFile struct {
-	instructionStatements []instructionStatement
+	buildStages []*buildStage
 }
 
-type instructionStatement interface {
-	toString() string
-	textDiff() string
-	diff() string // TODO: Change the return value format
+type buildStage struct {
+	instructions []instruction
 }
 
-type instructionType string
+type instruction interface {
+	implInstruction()
+	stringfy
+}
 
-const (
-	instructionTypeFrom  instructionType = "FROM"
-	instructionTypeRun   instructionType = "RUN"
-	instructionTypeOther instructionType = "other" // This parser doesn't parse instruction statements except FROM and RUN
-)
+// ParseMoldFile parses a MoldFile format file (includes Dockerfile)
+func ParseMoldFile(r io.Reader) (MoldFile, error) {
+	// TODO
+
+	// TODO: Separate to multiple stages with FROM instruction
+
+	return nil, nil
+}
+
+func checkNextInstructionType(br *bytes.Reader) (string, error) {
+	builder := new(strings.Builder)
+
+	for br.Len() != 0 {
+		bUnit, err := br.ReadByte()
+		if err != nil {
+			return "", err
+		}
+		b := []byte{bUnit}
+
+		if isSpace(b) || isNewlineChar(b) {
+			err = br.UnreadByte()
+			if err != nil {
+				return "", err
+			}
+
+			break
+		}
+
+		err = builder.WriteByte(bUnit)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	// Reset the offset of the reading buffer
+	_, err := br.Seek(int64(-builder.Len()), io.SeekCurrent)
+	if err != nil {
+		return "", err
+	}
+
+	s := strings.ToLower(builder.String())
+	_, isDockerfileInstruction := command.Commands[s]
+	if isDockerfileInstruction {
+		return s, nil
+	}
+
+	switch s {
+	case "#":
+		return "comment", nil
+	case "":
+		return "blank", nil
+	default:
+		return "unknown", nil
+	}
+}
