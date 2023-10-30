@@ -79,13 +79,32 @@ func ParseMoldFile(ior io.Reader) (MoldFile, error) {
 
 	}
 
-	// TODO: Separate to multiple stages with FROM instruction
+	buildStages := make([]*buildStage, 0)
+	current := make([]instruction, 0)
+
+	for _, istr := range instructions {
+		_, isFromInstruction := istr.(*fromInstruction)
+		if isFromInstruction && len(current) != 0 {
+			currentStage := &buildStage{
+				instructions: current,
+			}
+			buildStages = append(buildStages, currentStage)
+
+			current = make([]instruction, 0)
+		}
+
+		current = append(current, istr)
+	}
+
+	if len(current) != 0 {
+		currentStage := &buildStage{
+			instructions: current,
+		}
+		buildStages = append(buildStages, currentStage)
+	}
+
 	parsed := &moldFile{
-		buildStages: []*buildStage{
-			{
-				instructions: instructions,
-			},
-		},
+		buildStages: buildStages,
 	}
 
 	return parsed, nil

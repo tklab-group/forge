@@ -158,15 +158,17 @@ func ParseRunInstruction(r reader) (RunInstruction, error) {
 				continue
 			}
 
-			if slices.Contains(supportedPackageManagerCmd, buffer.String()) {
-				err := instruction.parsePackageManagerCmd(r, buffer, b)
-				if err != nil {
-					return nil, fmt.Errorf("failed to parse as a package manager command: %v", err)
-				}
-			} else {
-				err := instruction.parseOtherCmd(r, buffer, b)
-				if err != nil {
-					return nil, fmt.Errorf("failed to pares as an other command: %v", err)
+			if buffer.Len() != 0 {
+				if slices.Contains(supportedPackageManagerCmd, buffer.String()) {
+					err := instruction.parsePackageManagerCmd(r, buffer, b)
+					if err != nil {
+						return nil, fmt.Errorf("failed to parse as a package manager command: %v", err)
+					}
+				} else {
+					err := instruction.parseOtherCmd(r, buffer, b)
+					if err != nil {
+						return nil, fmt.Errorf("failed to pares as an other command: %v", err)
+					}
 				}
 			}
 

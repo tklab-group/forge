@@ -28,10 +28,17 @@ func TestParseMoldFile(t *testing.T) {
 			isError:  false,
 			err:      nil,
 		},
+		{
+			name:     "Multi-stage build",
+			fileName: "multi-stage.mold",
+			isError:  false,
+			err:      nil,
+		},
 	}
 
 	g := goldie.New(t, goldie.WithFixtureDir(path.Join(moldfileGoldenFileDir, "parse")))
 	for _, test := range tests {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -95,6 +102,7 @@ func Test_checkNextInstructionType(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 

@@ -56,10 +56,23 @@ func TestParseRunInstruction(t *testing.T) {
 			isError:  false,
 			err:      nil,
 		},
+		{
+			name:     "apt command ends with newline",
+			fileName: "apt-with-newline.mold",
+			isError:  false,
+			err:      nil,
+		},
+		{
+			name:     "curl command ends with newline",
+			fileName: "curl-with-newline.mold",
+			isError:  false,
+			err:      nil,
+		},
 	}
 
 	g := goldie.New(t, goldie.WithFixtureDir(path.Join(runGoldenFileDir, "parse")))
 	for _, test := range tests {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -114,9 +127,18 @@ func Test_runInstruction_ToString(t *testing.T) {
 			name:     "multiple commands with &&",
 			fileName: "multiple-commands.mold",
 		},
+		{
+			name:     "apt command ends with newline",
+			fileName: "apt-with-newline.mold",
+		},
+		{
+			name:     "curl command ends with newline",
+			fileName: "curl-with-newline.mold",
+		},
 	}
 
 	for _, test := range tests {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
