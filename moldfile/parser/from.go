@@ -1,10 +1,8 @@
 package parser
 
 import (
-	"bufio"
 	"bytes"
 	"fmt"
-	"io"
 	"strings"
 
 	"github.com/tklab-group/forge/util/optional"
@@ -63,7 +61,7 @@ type platformFlag struct {
 	rawTextContainer
 }
 
-func ParseFromInstruction(r io.Reader) (FromInstruction, error) {
+func ParseFromInstruction(r reader) (FromInstruction, error) {
 	instruction := &fromInstruction{
 		elements:       make([]fromInstructionElement, 0),
 		imageInfo:      nil,
@@ -73,13 +71,14 @@ func ParseFromInstruction(r io.Reader) (FromInstruction, error) {
 
 	buffer := new(bytes.Buffer)
 
-	scanner := bufio.NewScanner(r)
-	scanner.Split(bufio.ScanBytes)
+	for !r.Empty() {
+		b, err := r.ReadBytes()
+		if err != nil {
+			return nil, err
+		}
 
-	for scanner.Scan() {
-		b := scanner.Bytes()
 		if isSpace(b) {
-			err := instruction.treatFromInstructionElement(scanner, buffer, b)
+			err := instruction.treatFromInstructionElement(r, buffer, b)
 			if err != nil {
 				return nil, fmt.Errorf("failed to parse as fromInstructionElement: %v", err)
 			}
@@ -87,7 +86,7 @@ func ParseFromInstruction(r io.Reader) (FromInstruction, error) {
 		}
 
 		if isNewlineChar(b) {
-			err := instruction.treatFromInstructionElement(scanner, buffer, b)
+			err := instruction.treatFromInstructionElement(r, buffer, b)
 			if err != nil {
 				return nil, fmt.Errorf("failed to parse as fromInstructionElement: %v", err)
 			}
@@ -96,13 +95,13 @@ func ParseFromInstruction(r io.Reader) (FromInstruction, error) {
 			break
 		}
 
-		_, err := buffer.Write(b)
+		_, err = buffer.Write(b)
 		if err != nil {
 			return nil, fmt.Errorf("failed to write to buffer: %v", err)
 		}
 	}
 
-	err := instruction.treatFromInstructionElement(scanner, buffer, []byte(""))
+	err := instruction.treatFromInstructionElement(r, buffer, []byte(""))
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse as fromInstructionElement: %v", err)
 	}
@@ -110,7 +109,7 @@ func ParseFromInstruction(r io.Reader) (FromInstruction, error) {
 	return instruction, nil
 }
 
-func (f *fromInstruction) treatFromInstructionElement(scanner *bufio.Scanner, buffer *bytes.Buffer, currentByte []byte) error {
+func (f *fromInstruction) treatFromInstructionElement(r reader, buffer *bytes.Buffer, currentByte []byte) error {
 	appendCurrentByte := func() {
 		if isSpace(currentByte) {
 			f.appendElement(newSpaceFromByte(currentByte))
@@ -185,7 +184,7 @@ func (f *fromInstruction) treatFromInstructionElement(scanner *bufio.Scanner, bu
 
 	// Parse `AS {buildStageName}`
 	if strings.ToLower(s) == "as" && !f.buildStageInfo.HasValue() {
-		err := f.parseBuildStageInfo(scanner, buffer, currentByte, s)
+		err := f.parseBuildStageInfo(r, buffer, currentByte, s)
 		if err != nil {
 			return fmt.Errorf("failed to parse buildStageInfo: %v", err)
 		}
@@ -195,7 +194,7 @@ func (f *fromInstruction) treatFromInstructionElement(scanner *bufio.Scanner, bu
 	return fmt.Errorf("unexpected format")
 }
 
-func (f *fromInstruction) parseBuildStageInfo(scanner *bufio.Scanner, buffer *bytes.Buffer, currentByte []byte, s string) error {
+func (f *fromInstruction) parseBuildStageInfo(r reader, buffer *bytes.Buffer, currentByte []byte, s string) error {
 	if !isSpace(currentByte) {
 		return fmt.Errorf("unexpected token: %v", currentByte)
 	}
@@ -217,8 +216,11 @@ func (f *fromInstruction) parseBuildStageInfo(scanner *bufio.Scanner, buffer *by
 	buildStageBuff := new(bytes.Buffer)
 
 	// Read all spaces between "AS" and the stage name
-	for scanner.Scan() {
-		b := scanner.Bytes()
+	for !r.Empty() {
+		b, err := r.ReadBytes()
+		if err != nil {
+			return err
+		}
 
 		if isNewlineChar(b) {
 			return fmt.Errorf("unexpected newline code")
@@ -236,8 +238,11 @@ func (f *fromInstruction) parseBuildStageInfo(scanner *bufio.Scanner, buffer *by
 	}
 
 	var lastElement buildStageInfoElement
-	for scanner.Scan() {
-		b := scanner.Bytes()
+	for !r.Empty() {
+		b, err := r.ReadBytes()
+		if err != nil {
+			return err
+		}
 
 		if isNewlineChar(b) {
 			lastElement = newNewlineCharFromByte(b)
@@ -248,7 +253,7 @@ func (f *fromInstruction) parseBuildStageInfo(scanner *bufio.Scanner, buffer *by
 			break
 		}
 
-		_, err := buildStageBuff.Write(b)
+		_, err = buildStageBuff.Write(b)
 		if err != nil {
 			return fmt.Errorf("failed to write to buffer: %v", err)
 		}

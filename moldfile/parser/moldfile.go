@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/moby/buildkit/frontend/dockerfile/command"
 	"io"
@@ -30,17 +29,15 @@ type instruction interface {
 }
 
 // ParseMoldFile parses a MoldFile format file (includes Dockerfile)
-func ParseMoldFile(r io.Reader) (MoldFile, error) {
-	b, err := io.ReadAll(r)
+func ParseMoldFile(ior io.Reader) (MoldFile, error) {
+	r, err := newReader(ior)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read all: %v", err)
+		return nil, err
 	}
 
-	br := bytes.NewReader(b)
-
 	instructions := make([]instruction, 0)
-	for br.Len() != 0 {
-		nextType, err := checkNextInstructionType(br)
+	for !r.Empty() {
+		nextType, err := checkNextInstructionType(r)
 		if err != nil {
 			return nil, fmt.Errorf("faled to check next instruction type: %v", err)
 		}
@@ -48,7 +45,7 @@ func ParseMoldFile(r io.Reader) (MoldFile, error) {
 		switch nextType {
 		case command.Run:
 			slog.Debug("parsing RUN instruction")
-			runInstruction, err := ParseRunInstruction(br)
+			runInstruction, err := ParseRunInstruction(r)
 			if err != nil {
 				return nil, fmt.Errorf("failed to parse as RUN: %v", err)
 			}
@@ -56,7 +53,7 @@ func ParseMoldFile(r io.Reader) (MoldFile, error) {
 			instructions = append(instructions, runInstruction)
 		case command.From:
 			slog.Debug("parsing FROM instruction")
-			fromInstruction, err := ParseFromInstruction(br)
+			fromInstruction, err := ParseFromInstruction(r)
 			if err != nil {
 				return nil, fmt.Errorf("failed to parse as FROM: %v", err)
 			}
@@ -72,7 +69,7 @@ func ParseMoldFile(r io.Reader) (MoldFile, error) {
 				enableMultiline = true
 			}
 
-			otherInstruction, err := ParseOtherInstruction(br, enableMultiline)
+			otherInstruction, err := ParseOtherInstruction(r, enableMultiline)
 			if err != nil {
 				return nil, fmt.Errorf("failed to parse as OtherInstruction: %v", err)
 			}
@@ -94,18 +91,17 @@ func ParseMoldFile(r io.Reader) (MoldFile, error) {
 	return parsed, nil
 }
 
-func checkNextInstructionType(br *bytes.Reader) (string, error) {
+func checkNextInstructionType(r reader) (string, error) {
 	builder := new(strings.Builder)
 
-	for br.Len() != 0 {
-		bUnit, err := br.ReadByte()
+	for !r.Empty() {
+		b, err := r.ReadBytes()
 		if err != nil {
 			return "", err
 		}
-		b := []byte{bUnit}
 
 		if isSpace(b) || isNewlineChar(b) {
-			err = br.UnreadByte()
+			_, err = r.Seek(-1, io.SeekCurrent)
 			if err != nil {
 				return "", err
 			}
@@ -113,14 +109,14 @@ func checkNextInstructionType(br *bytes.Reader) (string, error) {
 			break
 		}
 
-		err = builder.WriteByte(bUnit)
+		_, err = builder.Write(b)
 		if err != nil {
 			return "", err
 		}
 	}
 
 	// Reset the offset of the reading buffer
-	_, err := br.Seek(int64(-builder.Len()), io.SeekCurrent)
+	_, err := r.Seek(int64(-builder.Len()), io.SeekCurrent)
 	if err != nil {
 		return "", err
 	}

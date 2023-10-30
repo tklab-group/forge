@@ -60,7 +60,10 @@ func TestParseOtherInstruction(t *testing.T) {
 			defer f.Close()
 			require.NoError(t, err)
 
-			got, err := ParseOtherInstruction(f, test.enableMultiline)
+			r, err := newReader(f)
+			require.NoError(t, err)
+
+			got, err := ParseOtherInstruction(r, test.enableMultiline)
 
 			if test.isError {
 				assert.Error(t, err)
@@ -112,7 +115,10 @@ func Test_otherInstruction_ToString(t *testing.T) {
 			defer f.Close()
 			require.NoError(t, err)
 
-			instruction, err := ParseOtherInstruction(f, test.enableMultiline)
+			r, err := newReader(f)
+			require.NoError(t, err)
+
+			instruction, err := ParseOtherInstruction(r, test.enableMultiline)
 			require.NoError(t, err)
 
 			got := instruction.ToString()

@@ -1,10 +1,8 @@
 package parser
 
 import (
-	"bufio"
 	"bytes"
 	"fmt"
-	"io"
 	"slices"
 	"strings"
 )
@@ -75,7 +73,7 @@ type otherCmd struct {
 	rawTextContainer
 }
 
-func ParseRunInstruction(r io.Reader) (RunInstruction, error) {
+func ParseRunInstruction(r reader) (RunInstruction, error) {
 	instruction := &runInstruction{
 		elements:  make([]runInstructionElement, 0),
 		runString: nil,
@@ -83,12 +81,12 @@ func ParseRunInstruction(r io.Reader) (RunInstruction, error) {
 
 	buffer := new(bytes.Buffer)
 
-	scanner := bufio.NewScanner(r)
-	scanner.Split(bufio.ScanBytes)
-
 	// Parse "RUN"
-	for scanner.Scan() {
-		b := scanner.Bytes()
+	for !r.Empty() {
+		b, err := r.ReadBytes()
+		if err != nil {
+			return nil, err
+		}
 
 		if isSpace(b) {
 			s := buffer.String()
@@ -109,7 +107,7 @@ func ParseRunInstruction(r io.Reader) (RunInstruction, error) {
 			break
 		}
 
-		_, err := buffer.Write(b)
+		_, err = buffer.Write(b)
 		if err != nil {
 			return nil, fmt.Errorf("failed to write to buffer: %v", err)
 		}
@@ -117,11 +115,14 @@ func ParseRunInstruction(r io.Reader) (RunInstruction, error) {
 
 	// Parse commands in RUN statements
 	var noStrInCurrentLine bool = false // The first line starts with RUN
-	for scanner.Scan() {
-		b := scanner.Bytes()
+	for !r.Empty() {
+		b, err := r.ReadBytes()
+		if err != nil {
+			return nil, err
+		}
 
 		if isCommentSharp(b) && noStrInCurrentLine {
-			comment, err := parseCommentLine(scanner, b)
+			comment, err := parseCommentLine(r, b)
 			if err != nil {
 				return nil, fmt.Errorf("faild to parse comment line: %v", err)
 			}
@@ -135,12 +136,12 @@ func ParseRunInstruction(r io.Reader) (RunInstruction, error) {
 				instruction.appendElement(newSpaceFromByte(b))
 			} else {
 				if slices.Contains(supportedPackageManagerCmd, buffer.String()) {
-					err := instruction.parsePackageManagerCmd(scanner, buffer, b)
+					err := instruction.parsePackageManagerCmd(r, buffer, b)
 					if err != nil {
 						return nil, fmt.Errorf("failed to parse as a package manager command: %v", err)
 					}
 				} else {
-					err := instruction.parseOtherCmd(scanner, buffer, b)
+					err := instruction.parseOtherCmd(r, buffer, b)
 					if err != nil {
 						return nil, fmt.Errorf("failed to pares as an other command: %v", err)
 					}
@@ -158,12 +159,12 @@ func ParseRunInstruction(r io.Reader) (RunInstruction, error) {
 			}
 
 			if slices.Contains(supportedPackageManagerCmd, buffer.String()) {
-				err := instruction.parsePackageManagerCmd(scanner, buffer, b)
+				err := instruction.parsePackageManagerCmd(r, buffer, b)
 				if err != nil {
 					return nil, fmt.Errorf("failed to parse as a package manager command: %v", err)
 				}
 			} else {
-				err := instruction.parseOtherCmd(scanner, buffer, b)
+				err := instruction.parseOtherCmd(r, buffer, b)
 				if err != nil {
 					return nil, fmt.Errorf("failed to pares as an other command: %v", err)
 				}
@@ -172,7 +173,7 @@ func ParseRunInstruction(r io.Reader) (RunInstruction, error) {
 			return instruction, nil // RUN instruction must end here
 		}
 
-		_, err := buffer.Write(b)
+		_, err = buffer.Write(b)
 		if err != nil {
 			return nil, err
 		}
@@ -182,15 +183,18 @@ func ParseRunInstruction(r io.Reader) (RunInstruction, error) {
 	return instruction, nil
 }
 
-func parseCommentLine(scanner *bufio.Scanner, prevByte []byte) (*comment, error) {
+func parseCommentLine(r reader, prevByte []byte) (*comment, error) {
 	commentBuffer := new(bytes.Buffer)
 	_, err := commentBuffer.Write(prevByte)
 	if err != nil {
 		return nil, err
 	}
 
-	for scanner.Scan() {
-		b := scanner.Bytes()
+	for !r.Empty() {
+		b, err := r.ReadBytes()
+		if err != nil {
+			return nil, err
+		}
 		if isNewlineChar(b) {
 			_, err = commentBuffer.Write(b)
 			if err != nil {
@@ -200,7 +204,7 @@ func parseCommentLine(scanner *bufio.Scanner, prevByte []byte) (*comment, error)
 			return newComment(commentBuffer.String()), nil
 		}
 
-		_, err := commentBuffer.Write(b)
+		_, err = commentBuffer.Write(b)
 		if err != nil {
 			return nil, err
 		}
@@ -209,7 +213,7 @@ func parseCommentLine(scanner *bufio.Scanner, prevByte []byte) (*comment, error)
 	return nil, fmt.Errorf("comment must end with newline. actual: %s", commentBuffer.String())
 }
 
-func (r *runInstruction) parsePackageManagerCmd(scanner *bufio.Scanner, buffer *bytes.Buffer, currentByte []byte) error {
+func (ri *runInstruction) parsePackageManagerCmd(r reader, buffer *bytes.Buffer, currentByte []byte) error {
 	if !(slices.Contains(supportedPackageManagerCmd, buffer.String()) && isSpace(currentByte)) {
 		return fmt.Errorf("unexpected input for parsePackageManagerCmd: `%s%s`", buffer.String(), string(currentByte))
 	}
@@ -227,7 +231,7 @@ func (r *runInstruction) parsePackageManagerCmd(scanner *bufio.Scanner, buffer *
 		subCmdOptions:  make([]*packageManagerOption, 0),
 		packages:       make([]packageInfo, 0),
 	}
-	r.appendElement(managerCmd)
+	ri.appendElement(managerCmd)
 
 	mainCmd := &packageManagerMainCmd{newRawTextContainer(buffer.String())}
 	buffer.Reset()
@@ -237,15 +241,19 @@ func (r *runInstruction) parsePackageManagerCmd(scanner *bufio.Scanner, buffer *
 	managerCmd.appendElement(newSpaceFromByte(currentByte))
 
 	var noStrInCurrentLine bool = false // The first line starts with a package manager command
-	for scanner.Scan() {
-		b := scanner.Bytes()
+	for !r.Empty() {
+		b, err := r.ReadBytes()
+		if err != nil {
+			return err
+		}
+
 		if isSpace(b) {
 			if buffer.Len() != 0 {
 				if isCommandSeparator(buffer.String()) {
-					r.appendElement(newCommandSeparator(buffer.String()))
+					ri.appendElement(newCommandSeparator(buffer.String()))
 					buffer.Reset()
 
-					r.appendElement(newSpaceFromByte(b))
+					ri.appendElement(newSpaceFromByte(b))
 					return nil // Current command ends here
 				}
 
@@ -274,7 +282,7 @@ func (r *runInstruction) parsePackageManagerCmd(scanner *bufio.Scanner, buffer *
 		}
 
 		if isCommentSharp(b) && noStrInCurrentLine {
-			comment, err := parseCommentLine(scanner, b)
+			comment, err := parseCommentLine(r, b)
 			if err != nil {
 				return fmt.Errorf("failed to parse as a comment line: %v", err)
 			}
@@ -283,7 +291,7 @@ func (r *runInstruction) parsePackageManagerCmd(scanner *bufio.Scanner, buffer *
 			continue
 		}
 
-		_, err := buffer.Write(b)
+		_, err = buffer.Write(b)
 		if err != nil {
 			return err
 		}
@@ -326,7 +334,7 @@ func (pmc *packageManagerCmd) parseElement(s string, packageInfoParser func(s st
 	pmc.packages = append(pmc.packages, packageInfo)
 }
 
-func (r *runInstruction) parseOtherCmd(scanner *bufio.Scanner, buffer *bytes.Buffer, currentByte []byte) error {
+func (ri *runInstruction) parseOtherCmd(r reader, buffer *bytes.Buffer, currentByte []byte) error {
 	builder := new(strings.Builder)
 
 	_, err := builder.WriteString(buffer.String())
@@ -341,18 +349,21 @@ func (r *runInstruction) parseOtherCmd(scanner *bufio.Scanner, buffer *bytes.Buf
 	}
 
 	var noStrInCurrentLine bool = false // The first line starts with a command
-	for scanner.Scan() {
-		b := scanner.Bytes()
+	for !r.Empty() {
+		b, err := r.ReadBytes()
+		if err != nil {
+			return err
+		}
 
 		if isSpace(b) {
 			if buffer.Len() != 0 {
 				if isCommandSeparator(buffer.String()) {
 					cmd := &otherCmd{newRawTextContainer(builder.String())}
-					r.appendElement(cmd)
+					ri.appendElement(cmd)
 
-					r.appendElement(newCommandSeparator(buffer.String()))
+					ri.appendElement(newCommandSeparator(buffer.String()))
 					buffer.Reset()
-					r.appendElement(newSpaceFromByte(b))
+					ri.appendElement(newSpaceFromByte(b))
 
 					return nil // Current command ends here
 				}
@@ -398,7 +409,7 @@ func (r *runInstruction) parseOtherCmd(scanner *bufio.Scanner, buffer *bytes.Buf
 		}
 
 		if isCommentSharp(b) && noStrInCurrentLine {
-			comment, err := parseCommentLine(scanner, b)
+			comment, err := parseCommentLine(r, b)
 			if err != nil {
 				return fmt.Errorf("failed to parse as a comment in a command: %v", err)
 			}
@@ -429,25 +440,25 @@ func (r *runInstruction) parseOtherCmd(scanner *bufio.Scanner, buffer *bytes.Buf
 	}
 
 	cmd := &otherCmd{newRawTextContainer(builder.String())}
-	r.appendElement(cmd)
+	ri.appendElement(cmd)
 
 	return nil
 }
 
-func (r *runInstruction) appendElement(element runInstructionElement) {
-	r.elements = append(r.elements, element)
+func (ri *runInstruction) appendElement(element runInstructionElement) {
+	ri.elements = append(ri.elements, element)
 }
 
 func (p *packageManagerCmd) appendElement(element packageManagerCmdElement) {
 	p.elements = append(p.elements, element)
 }
 
-func (r *runInstruction) toString() string {
-	return joinStringfys(r.elements)
+func (ri *runInstruction) toString() string {
+	return joinStringfys(ri.elements)
 }
 
-func (r *runInstruction) ToString() string {
-	return r.toString()
+func (ri *runInstruction) ToString() string {
+	return ri.toString()
 }
 
 func (pmc *packageManagerCmd) toString() string {
@@ -458,8 +469,8 @@ func (p *packageManagerArg) toString() string {
 	return p.packageInfo.toString()
 }
 
-func (r *runInstruction) implInstruction()    {}
-func (r *runInstruction) implRunInstruction() {}
+func (ri *runInstruction) implInstruction()    {}
+func (ri *runInstruction) implRunInstruction() {}
 
 func (r *runString) implRunInstructionElement()         {}
 func (p *packageManagerCmd) implRunInstructionElement() {}

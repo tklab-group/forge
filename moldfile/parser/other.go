@@ -1,8 +1,6 @@
 package parser
 
 import (
-	"bufio"
-	"io"
 	"strings"
 )
 
@@ -21,14 +19,15 @@ type otherInstruction struct {
 	rawTextContainer
 }
 
-func ParseOtherInstruction(r io.Reader, enableMultiline bool) (OtherInstruction, error) {
+func ParseOtherInstruction(r reader, enableMultiline bool) (OtherInstruction, error) {
 	builder := new(strings.Builder)
 
-	scanner := bufio.NewScanner(r)
-	scanner.Split(bufio.ScanBytes)
+	for !r.Empty() {
+		b, err := r.ReadBytes()
+		if err != nil {
+			return nil, err
+		}
 
-	for scanner.Scan() {
-		b := scanner.Bytes()
 		if isNewlineChar(b) {
 			if enableMultiline && strings.HasSuffix(builder.String(), " \\") {
 				_, err := builder.Write(b)
@@ -47,7 +46,7 @@ func ParseOtherInstruction(r io.Reader, enableMultiline bool) (OtherInstruction,
 			break // Instruction must end here
 		}
 
-		_, err := builder.Write(b)
+		_, err = builder.Write(b)
 		if err != nil {
 			return nil, err
 		}

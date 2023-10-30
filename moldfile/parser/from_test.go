@@ -67,7 +67,10 @@ func TestParseFromInstruction(t *testing.T) {
 			defer f.Close()
 			require.NoError(t, err)
 
-			got, err := ParseFromInstruction(f)
+			r, err := newReader(f)
+			require.NoError(t, err)
+
+			got, err := ParseFromInstruction(r)
 
 			if test.isError {
 				assert.Error(t, err)
@@ -116,13 +119,16 @@ func Test_fromInstruction_ToString(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
-			
+
 			filePath := path.Join(fromTestDataDir, test.fileName)
 			f, err := os.Open(filePath)
 			defer f.Close()
 			require.NoError(t, err)
 
-			instruction, err := ParseFromInstruction(f)
+			r, err := newReader(f)
+			require.NoError(t, err)
+
+			instruction, err := ParseFromInstruction(r)
 			require.NoError(t, err)
 
 			got := instruction.ToString()

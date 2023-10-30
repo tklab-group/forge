@@ -67,7 +67,10 @@ func TestParseRunInstruction(t *testing.T) {
 			defer f.Close()
 			require.NoError(t, err)
 
-			got, err := ParseRunInstruction(f)
+			r, err := newReader(f)
+			require.NoError(t, err)
+
+			got, err := ParseRunInstruction(r)
 
 			if test.isError {
 				assert.Error(t, err)
@@ -122,7 +125,10 @@ func Test_runInstruction_ToString(t *testing.T) {
 			defer f.Close()
 			require.NoError(t, err)
 
-			instruction, err := ParseRunInstruction(f)
+			r, err := newReader(f)
+			require.NoError(t, err)
+
+			instruction, err := ParseRunInstruction(r)
 			require.NoError(t, err)
 
 			got := instruction.ToString()

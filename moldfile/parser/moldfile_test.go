@@ -1,11 +1,58 @@
 package parser
 
 import (
-	"bytes"
+	"github.com/kr/pretty"
+	"github.com/sebdah/goldie/v2"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"io"
+	"os"
+	"path"
+	"strings"
 	"testing"
 )
+
+const moldfileTestDataDir = "testdata/moldfile"
+const moldfileGoldenFileDir = "testdata/moldfile/golden"
+
+func TestParseMoldFile(t *testing.T) {
+	tests := []struct {
+		name     string
+		fileName string
+		isError  bool
+		err      error
+	}{
+		{
+			name:     "simple",
+			fileName: "simple.mold",
+			isError:  false,
+			err:      nil,
+		},
+	}
+
+	g := goldie.New(t, goldie.WithFixtureDir(path.Join(moldfileGoldenFileDir, "parse")))
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			f, err := os.Open(path.Join(moldfileTestDataDir, test.fileName))
+			defer f.Close()
+			require.NoError(t, err)
+
+			got, err := ParseMoldFile(f)
+
+			if test.isError {
+				assert.Error(t, err)
+				// TODO: Check the value of err
+			} else {
+				assert.NoError(t, err)
+			}
+
+			g.Assert(t, test.fileName, []byte(pretty.Sprint(got)))
+		})
+
+	}
+}
 
 func Test_checkNextInstructionType(t *testing.T) {
 	t.Parallel()
@@ -51,16 +98,16 @@ func Test_checkNextInstructionType(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			br := bytes.NewReader([]byte(test.target))
-			got, err := checkNextInstructionType(br)
+			r, err := newReader(strings.NewReader(test.target))
+			got, err := checkNextInstructionType(r)
 
 			assert.NoError(t, err)
 			assert.Equal(t, test.expected, got)
 
 			// Check if resetting offset is ok
-			assert.Equal(t, len(test.target), br.Len())
+			assert.Equal(t, len(test.target), r.Len())
 
-			fromReader, err := io.ReadAll(br)
+			fromReader, err := io.ReadAll(r)
 			assert.NoError(t, err)
 			assert.Equal(t, test.target, string(fromReader))
 		})
