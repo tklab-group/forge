@@ -1,0 +1,54 @@
+&parser.runInstruction{
+    elements: {
+        &parser.runString{
+            rawTextContainer: parser.rawTextContainer{rawText:"RUN"},
+        },
+        &parser.space{
+            rawTextContainer: parser.rawTextContainer{rawText:" "},
+        },
+        &parser.packageManagerCmd{
+            elements: {
+                &parser.packageManagerMainCmd{
+                    rawTextContainer: parser.rawTextContainer{rawText:"apt"},
+                },
+                &parser.space{
+                    rawTextContainer: parser.rawTextContainer{rawText:" "},
+                },
+                &parser.packageManagerSubCmd{
+                    rawTextContainer: parser.rawTextContainer{rawText:"install"},
+                },
+                &parser.space{
+                    rawTextContainer: parser.rawTextContainer{rawText:" "},
+                },
+                &parser.packageManagerArg{
+                    packageInfo: &parser.aptPackageInfo{
+                        name:    "git",
+                        version: optional.Of[string]{},
+                    },
+                },
+                &parser.newlineChar{
+                    rawTextContainer: parser.rawTextContainer{rawText:"\n"},
+                },
+            },
+            mainCmd: &parser.packageManagerMainCmd{
+                rawTextContainer: parser.rawTextContainer{rawText:"apt"},
+            },
+            mainCmdOptions: {
+            },
+            subCmd: &parser.packageManagerSubCmd{
+                rawTextContainer: parser.rawTextContainer{rawText:"install"},
+            },
+            subCmdOptions: {
+            },
+            packages: {
+                &parser.aptPackageInfo{
+                    name:    "git",
+                    version: optional.Of[string]{},
+                },
+            },
+        },
+    },
+    runString: &parser.runString{
+        rawTextContainer: parser.rawTextContainer{rawText:"RUN"},
+    },
+}

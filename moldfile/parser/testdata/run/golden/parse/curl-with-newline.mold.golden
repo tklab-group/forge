@@ -1,0 +1,16 @@
+&parser.runInstruction{
+    elements: {
+        &parser.runString{
+            rawTextContainer: parser.rawTextContainer{rawText:"RUN"},
+        },
+        &parser.space{
+            rawTextContainer: parser.rawTextContainer{rawText:" "},
+        },
+        &parser.otherCmd{
+            rawTextContainer: parser.rawTextContainer{rawText:"curl http://example.com\n"},
+        },
+    },
+    runString: &parser.runString{
+        rawTextContainer: parser.rawTextContainer{rawText:"RUN"},
+    },
+}

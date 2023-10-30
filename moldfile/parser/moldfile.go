@@ -10,7 +10,7 @@ import (
 
 type MoldFile interface {
 	stringfy
-	//ToString() string
+	ToString() string
 	//TextDiff() string
 	//Diff() []string // TODO: Change the return value format
 }
@@ -79,13 +79,32 @@ func ParseMoldFile(ior io.Reader) (MoldFile, error) {
 
 	}
 
-	// TODO: Separate to multiple stages with FROM instruction
+	buildStages := make([]*buildStage, 0)
+	current := make([]instruction, 0)
+
+	for _, istr := range instructions {
+		_, isFromInstruction := istr.(*fromInstruction)
+		if isFromInstruction && len(current) != 0 {
+			currentStage := &buildStage{
+				instructions: current,
+			}
+			buildStages = append(buildStages, currentStage)
+
+			current = make([]instruction, 0)
+		}
+
+		current = append(current, istr)
+	}
+
+	if len(current) != 0 {
+		currentStage := &buildStage{
+			instructions: current,
+		}
+		buildStages = append(buildStages, currentStage)
+	}
+
 	parsed := &moldFile{
-		buildStages: []*buildStage{
-			{
-				instructions: instructions,
-			},
-		},
+		buildStages: buildStages,
 	}
 
 	return parsed, nil
@@ -139,6 +158,10 @@ func checkNextInstructionType(r reader) (string, error) {
 
 func (m *moldFile) toString() string {
 	return joinStringfys(m.buildStages)
+}
+
+func (m *moldFile) ToString() string {
+	return m.toString()
 }
 
 func (b *buildStage) toString() string {

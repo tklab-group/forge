@@ -28,10 +28,17 @@ func TestParseMoldFile(t *testing.T) {
 			isError:  false,
 			err:      nil,
 		},
+		{
+			name:     "Multi-stage build",
+			fileName: "multi-stage.mold",
+			isError:  false,
+			err:      nil,
+		},
 	}
 
 	g := goldie.New(t, goldie.WithFixtureDir(path.Join(moldfileGoldenFileDir, "parse")))
 	for _, test := range tests {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -95,6 +102,7 @@ func Test_checkNextInstructionType(t *testing.T) {
 	}
 
 	for _, test := range tests {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -110,6 +118,47 @@ func Test_checkNextInstructionType(t *testing.T) {
 			fromReader, err := io.ReadAll(r)
 			assert.NoError(t, err)
 			assert.Equal(t, test.target, string(fromReader))
+		})
+	}
+}
+
+func Test_moldFile_ToString(t *testing.T) {
+	tests := []struct {
+		name     string
+		fileName string
+	}{
+		{
+			name:     "simple",
+			fileName: "simple.mold",
+		},
+		{
+			name:     "Multi-stage build",
+			fileName: "multi-stage.mold",
+		},
+	}
+
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
+			filePath := path.Join(moldfileTestDataDir, test.fileName)
+			f, err := os.Open(filePath)
+			defer f.Close()
+			require.NoError(t, err)
+
+			r, err := newReader(f)
+			require.NoError(t, err)
+
+			instruction, err := ParseMoldFile(r)
+			require.NoError(t, err)
+
+			got := instruction.ToString()
+
+			expected, err := os.ReadFile(filePath)
+			require.NoError(t, err)
+
+			assert.Equal(t, string(expected), got)
 		})
 	}
 }
