@@ -10,6 +10,7 @@ import (
 )
 
 type RunInstruction interface {
+	implInstruction()
 	implRunInstruction()
 	stringfy
 	ToString() string
@@ -457,6 +458,7 @@ func (p *packageManagerArg) toString() string {
 	return p.packageInfo.toString()
 }
 
+func (r *runInstruction) implInstruction()    {}
 func (r *runInstruction) implRunInstruction() {}
 
 func (r *runString) implRunInstructionElement()         {}

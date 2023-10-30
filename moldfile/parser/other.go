@@ -11,6 +11,7 @@ import (
 //
 // TODO: Consider to separate to other interface for holding a comment and a blank line.
 type OtherInstruction interface {
+	implInstruction()
 	implOtherInstruction()
 	stringfy
 	ToString() string
@@ -63,4 +64,5 @@ func (o *otherInstruction) ToString() string {
 	return o.toString()
 }
 
+func (o *otherInstruction) implInstruction()      {}
 func (o *otherInstruction) implOtherInstruction() {}

@@ -11,6 +11,7 @@ import (
 )
 
 type FromInstruction interface {
+	implInstruction()
 	implFromInstruction()
 	stringfy
 	ToString() string
@@ -294,6 +295,7 @@ func (b *buildStageInfo) toString() string {
 	return joinStringfys(b.elements)
 }
 
+func (f *fromInstruction) implInstruction()     {}
 func (f *fromInstruction) implFromInstruction() {}
 
 func (f *fromString) implFromInstructionElement()     {}
