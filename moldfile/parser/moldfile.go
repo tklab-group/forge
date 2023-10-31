@@ -27,6 +27,7 @@ type BuildStage interface {
 	stringfy
 	ToString() string
 	GetFromInstruction() (FromInstruction, error)
+	UpdatePackageInfos(reference packageVersions)
 }
 
 type buildStage struct {
@@ -203,6 +204,16 @@ func (b *buildStage) GetFromInstruction() (FromInstruction, error) {
 	}
 
 	return fromIstr, nil
+}
+
+func (b *buildStage) UpdatePackageInfos(reference packageVersions) {
+	for _, istr := range b.instructions {
+		runIstr, ok := istr.(RunInstruction)
+		if ok {
+			runIstr.UpdatePackageInfos(reference)
+		}
+	}
+
 }
 
 func (b *buildStage) toString() string {

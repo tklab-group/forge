@@ -13,7 +13,11 @@ type RunInstruction interface {
 	implRunInstruction()
 	stringfy
 	ToString() string
+	UpdatePackageInfos(reference packageVersions)
 }
+
+// "package manager name": {"package name": "version"}
+type packageVersions map[string]map[string]string
 
 type runInstruction struct {
 	elements  []runInstructionElement
@@ -62,6 +66,7 @@ type packageManagerArg struct {
 type packageInfo interface {
 	implPackageInfo()
 	stringfy
+	updatePackageInfo(reference packageVersions)
 }
 
 var supportedPackageManagerCmd = []string{"apt", "apt-get"}
@@ -453,8 +458,23 @@ func (ri *runInstruction) parseOtherCmd(r reader, buffer *bytes.Buffer, currentB
 	return nil
 }
 
+func (ri *runInstruction) UpdatePackageInfos(reference packageVersions) {
+	for _, element := range ri.elements {
+		pmc, ok := element.(*packageManagerCmd)
+		if ok {
+			pmc.updatePackageInfos(reference)
+		}
+	}
+}
+
 func (ri *runInstruction) appendElement(element runInstructionElement) {
 	ri.elements = append(ri.elements, element)
+}
+
+func (pmc *packageManagerCmd) updatePackageInfos(reference packageVersions) {
+	for _, pkg := range pmc.packages {
+		pkg.updatePackageInfo(reference)
+	}
 }
 
 func (p *packageManagerCmd) appendElement(element packageManagerCmdElement) {

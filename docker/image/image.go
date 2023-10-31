@@ -37,11 +37,11 @@ func GetLatestDigest(imageName string) (digest string, err error) {
 
 	ctx := context.Background()
 	res, err := client.ImagePull(ctx, imageName, types.ImagePullOptions{})
-	defer res.Close()
-
 	if err != nil {
 		return "", fmt.Errorf("failed to pull `%s`: %v", imageName, err)
 	}
+
+	defer res.Close()
 
 	_, err = io.ReadAll(res)
 	if err != nil {
