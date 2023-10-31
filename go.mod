@@ -11,6 +11,7 @@ require (
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/moby/buildkit v0.12.2 // indirect
@@ -21,6 +22,8 @@ require (
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	github.com/sebdah/goldie/v2 v2.5.3 // indirect
 	github.com/sergi/go-diff v1.3.1 // indirect
+	github.com/spf13/cobra v1.7.0 // indirect
+	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
 	golang.org/x/mod v0.13.0 // indirect
 	golang.org/x/net v0.16.0 // indirect
