@@ -3,6 +3,7 @@ package cli
 import (
 	"github.com/spf13/cobra"
 	"github.com/tklab-group/forge/cli/config"
+	"github.com/tklab-group/forge/cli/mold"
 	"os"
 )
 
@@ -15,8 +16,10 @@ func newRootCmd(config config.Config) *cobra.Command {
 	rootCmd.SetIn(config.In)
 	rootCmd.SetOut(config.Out)
 	rootCmd.SetErr(config.Err)
-
-	// TODO: Add sub commands to rootCmd
+	
+	rootCmd.AddCommand(
+		mold.Cmd(config),
+	)
 
 	return rootCmd
 }
