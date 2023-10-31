@@ -12,7 +12,7 @@ var moldfilePath string
 
 func Cmd(config config.Config) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "mold [OPTIONS] PATH",
+		Use:   "mold PATH",
 		Short: `Generate moldfile.`,
 		Long:  `Generate moldfile from existing Dockerfile and build context. Using PATH as build context.`,
 		Args:  cobra.MinimumNArgs(1),

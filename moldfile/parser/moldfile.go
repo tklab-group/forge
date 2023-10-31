@@ -25,6 +25,7 @@ type moldFile struct {
 type BuildStage interface {
 	implBuildStage()
 	stringfy
+	ToString() string
 	GetFromInstruction() (FromInstruction, error)
 }
 
@@ -184,6 +185,10 @@ func (m *moldFile) GetBuildStage(index int) (BuildStage, error) {
 	}
 
 	return m.buildStages[index], nil
+}
+
+func (b *buildStage) ToString() string {
+	return b.toString()
 }
 
 func (b *buildStage) GetFromInstruction() (FromInstruction, error) {

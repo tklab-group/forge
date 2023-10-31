@@ -7,6 +7,8 @@ import (
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"io"
+	"os"
+	"os/exec"
 	"slices"
 	"strings"
 )
@@ -79,4 +81,31 @@ func GetLatestDigest(imageName string) (digest string, err error) {
 	}
 
 	return split[1], nil
+}
+
+func BuildImageWithCLI(dockerfilePath string, buildContext string) (iid string, err error) {
+	iidFile, err := os.CreateTemp("/tmp", "iid")
+	if err != nil {
+		return "", err
+	}
+	defer os.Remove(iidFile.Name())
+
+	flags := []string{"--iidfile", iidFile.Name()}
+	if dockerfilePath != "" {
+		flags = append(flags, "--file", dockerfilePath)
+	}
+
+	args := append(flags, buildContext)
+
+	cmd := exec.Command("docker", args...)
+
+	// TODO: Output building logs
+	err = cmd.Run()
+
+	imageId, err := io.ReadAll(iidFile)
+	if err != nil {
+		return "", err
+	}
+
+	return string(imageId), nil
 }

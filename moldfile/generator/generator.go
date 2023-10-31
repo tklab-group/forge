@@ -56,7 +56,20 @@ func moldPerBuildStage(moldFile parser.MoldFile, buildContext string, stageIndex
 		return fmt.Errorf("failed to mold base image: %v", err)
 	}
 
-	// TODO: Mold package version
+	priorBuildStages := make([]parser.BuildStage, 0)
+	for i := 0; i < stageIndex; i++ {
+		priorBuildStage, err := moldFile.GetBuildStage(i)
+		if err != nil {
+			return fmt.Errorf("failed to get prior BuildStage index=%d: %v", i, err)
+		}
+
+		priorBuildStages = append(priorBuildStages, priorBuildStage)
+	}
+
+	err = moldPackageVersion(target, priorBuildStages, buildContext)
+	if err != nil {
+		return fmt.Errorf("failed to mold package versions: %v", err)
+	}
 
 	return nil
 }
@@ -73,6 +86,46 @@ func moldBaseImage(buildStage parser.BuildStage) error {
 	}
 
 	fromInstruction.UpdateImageInfo(latestDigest)
+
+	return nil
+}
+
+func moldPackageVersion(buildStage parser.BuildStage, priorBuildStages []parser.BuildStage, buildContext string) error {
+	tmpDockerfile, err := os.CreateTemp("/tmp", "Dockerfile")
+	if err != nil {
+		return err
+	}
+	defer os.Remove(tmpDockerfile.Name())
+
+	for _, priorBuildStage := range priorBuildStages {
+		_, err = tmpDockerfile.WriteString(priorBuildStage.ToString())
+		if err != nil {
+			return err
+		}
+	}
+
+	_, err = tmpDockerfile.WriteString(buildStage.ToString())
+	if err != nil {
+		return err
+	}
+
+	err = tmpDockerfile.Close()
+	if err != nil {
+		return err
+	}
+
+	_, err = image.BuildImageWithCLI(tmpDockerfile.Name(), buildContext)
+	if err != nil {
+		return err
+	}
+
+	slog.Warn("Skipping some process")
+
+	// TODO: Support other package managers
+
+	// TODO: Call disassembler methods
+
+	// TODO: Set version information
 
 	return nil
 }
