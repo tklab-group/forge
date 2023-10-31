@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func GenerateMoldfile(dockerfilePath string, buildContext string) error {
+func GenerateMoldfile(dockerfilePath string, buildContext string, moldfilePath string) error {
 	slog.Info("reading Dockerfile")
 	dockerfile, err := os.Open(dockerfilePath)
 	if err != nil {
@@ -29,6 +29,17 @@ func GenerateMoldfile(dockerfilePath string, buildContext string) error {
 		if err != nil {
 			return fmt.Errorf("failed to mold build stage index=%d: %v", i, err)
 		}
+	}
+
+	f, err := os.Create(moldfilePath)
+	if err != nil {
+		return fmt.Errorf("failed to create `%s`: %v", moldfilePath, err)
+	}
+	defer f.Close()
+
+	_, err = f.WriteString(moldfile.ToString())
+	if err != nil {
+		return fmt.Errorf("failed to write to `%s`: %v", moldfilePath, err)
 	}
 
 	return nil
