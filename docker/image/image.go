@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func GetLatestDigest(imageName string) (string, error) {
+func GetLatestDigest(imageName string) (digest string, err error) {
 	if strings.Contains(imageName, "@") {
 		return strings.Split(imageName, "@")[1], nil
 	}

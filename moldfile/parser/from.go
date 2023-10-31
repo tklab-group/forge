@@ -13,6 +13,8 @@ type FromInstruction interface {
 	implFromInstruction()
 	stringfy
 	ToString() string
+	ImageInfoString() string
+	UpdateImageInfo(digest string)
 }
 
 type fromInstruction struct {
@@ -274,6 +276,14 @@ func (f *fromInstruction) parseBuildStageInfo(r reader, buffer *bytes.Buffer, cu
 	return nil
 }
 
+func (f *fromInstruction) ImageInfoString() string {
+	return f.imageInfo.toString()
+}
+
+func (f *fromInstruction) UpdateImageInfo(digest string) {
+	f.imageInfo.updateWithDigest(digest)
+}
+
 func (f *fromInstruction) appendElement(element fromInstructionElement) {
 	f.elements = append(f.elements, element)
 }
@@ -294,6 +304,14 @@ func (i *imageInfo) toString() string {
 	}
 
 	return i.name
+}
+
+func (i *imageInfo) updateWithDigest(digest string) {
+	if i.tag.HasValue() {
+		i.tag = optional.Of[string]{}
+	}
+
+	i.digest = optional.NewWithValue(digest)
 }
 
 func (b *buildStageInfo) toString() string {
