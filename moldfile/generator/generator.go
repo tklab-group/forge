@@ -6,6 +6,8 @@ import (
 	"github.com/tklab-group/forge/moldfile/parser"
 	"log/slog"
 	"os"
+
+	"github.com/tklab-group/docker-image-disassembler/disassembler"
 )
 
 func GenerateMoldfile(dockerfilePath string, buildContext string, moldfilePath string) error {
@@ -114,18 +116,21 @@ func moldPackageVersion(buildStage parser.BuildStage, priorBuildStages []parser.
 		return err
 	}
 
-	_, err = image.BuildImageWithCLI(tmpDockerfile.Name(), buildContext)
+	iid, err := image.BuildImageWithCLI(tmpDockerfile.Name(), buildContext)
 	if err != nil {
 		return err
 	}
 
-	slog.Warn("Skipping some process")
-
+	slog.Debug(fmt.Sprintf("iid: %s", iid))
 	// TODO: Support other package managers
 
-	// TODO: Call disassembler methods
+	_, err = disassembler.GetAptPkgInfoInImageFromImageID(iid)
+	if err != nil {
+		return fmt.Errorf("failed to disassemble: %v", err)
+	}
 
 	// TODO: Set version information
+	slog.Warn("Skipping some process")
 
 	return nil
 }

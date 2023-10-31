@@ -7,6 +7,7 @@ import (
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"io"
+	"log/slog"
 	"os"
 	"os/exec"
 	"slices"
@@ -90,19 +91,23 @@ func BuildImageWithCLI(dockerfilePath string, buildContext string) (iid string, 
 	}
 	defer os.Remove(iidFile.Name())
 
-	flags := []string{"--iidfile", iidFile.Name()}
+	args := []string{"build", "--iidfile", iidFile.Name()}
 	if dockerfilePath != "" {
-		flags = append(flags, "--file", dockerfilePath)
+		args = append(args, "--file", dockerfilePath)
 	}
 
-	args := append(flags, buildContext)
+	args = append(args, buildContext)
 
 	cmd := exec.Command("docker", args...)
 
-	// TODO: Output building logs
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	slog.Info(cmd.String())
+
 	err = cmd.Run()
 
-	imageId, err := io.ReadAll(iidFile)
+	imageId, err := os.ReadFile(iidFile.Name())
 	if err != nil {
 		return "", err
 	}
