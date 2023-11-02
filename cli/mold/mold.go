@@ -1,9 +1,12 @@
 package mold
 
 import (
+	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/tklab-group/forge/cli/config"
 	"github.com/tklab-group/forge/moldfile/generator"
+	"log/slog"
+	"os"
 	"path"
 )
 
@@ -26,10 +29,25 @@ func Cmd(config config.Config) *cobra.Command {
 				moldfilePath = path.Join(buildContext, "Dockerfile.mold")
 			}
 
-			err := generator.GenerateMoldfile(dockerfilePath, buildContext, moldfilePath)
+			moldfile, err := generator.GenerateMoldfile(dockerfilePath, buildContext)
 			if err != nil {
 				return err
 			}
+
+			slog.Info(fmt.Sprintf("write to %s", moldfilePath))
+
+			f, err := os.Create(moldfilePath)
+			if err != nil {
+				return fmt.Errorf("failed to create `%s`: %v", moldfilePath, err)
+			}
+			defer f.Close()
+
+			_, err = f.WriteString(moldfile.ToString())
+			if err != nil {
+				return fmt.Errorf("failed to write to `%s`: %v", moldfilePath, err)
+			}
+
+			slog.Info("Done")
 
 			return nil
 		},

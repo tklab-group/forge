@@ -10,18 +10,18 @@ import (
 	"github.com/tklab-group/docker-image-disassembler/disassembler"
 )
 
-func GenerateMoldfile(dockerfilePath string, buildContext string, moldfilePath string) error {
+func GenerateMoldfile(dockerfilePath string, buildContext string) (parser.MoldFile, error) {
 	slog.Info("reading Dockerfile")
 	dockerfile, err := os.Open(dockerfilePath)
 	if err != nil {
-		return fmt.Errorf("failed to open Dockerfile: %v", err)
+		return nil, fmt.Errorf("failed to open Dockerfile: %v", err)
 	}
 	defer dockerfile.Close()
 
 	slog.Info("parsing Dockerfile")
 	moldfile, err := parser.ParseMoldFile(dockerfile)
 	if err != nil {
-		return fmt.Errorf("failed to parse Dockerfile: %v", err)
+		return nil, fmt.Errorf("failed to parse Dockerfile: %v", err)
 	}
 
 	for i := 0; i < moldfile.BuildStageCount(); i++ {
@@ -29,25 +29,13 @@ func GenerateMoldfile(dockerfilePath string, buildContext string, moldfilePath s
 
 		err = moldPerBuildStage(moldfile, buildContext, i)
 		if err != nil {
-			return fmt.Errorf("failed to mold build stage index=%d: %v", i, err)
+			return nil, fmt.Errorf("failed to mold build stage index=%d: %v", i, err)
 		}
 	}
 
 	slog.Info("finish molding")
-	slog.Info(fmt.Sprintf("write to %s", moldfilePath))
 
-	f, err := os.Create(moldfilePath)
-	if err != nil {
-		return fmt.Errorf("failed to create `%s`: %v", moldfilePath, err)
-	}
-	defer f.Close()
-
-	_, err = f.WriteString(moldfile.ToString())
-	if err != nil {
-		return fmt.Errorf("failed to write to `%s`: %v", moldfilePath, err)
-	}
-
-	return nil
+	return moldfile, nil
 }
 
 func moldPerBuildStage(moldFile parser.MoldFile, buildContext string, stageIndex int) error {
