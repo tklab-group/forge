@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/tklab-group/forge/cli/config"
+	"github.com/tklab-group/forge/docker"
 	"github.com/tklab-group/forge/moldfile/generator"
 	"log/slog"
 	"os"
@@ -27,6 +28,11 @@ func Cmd(config config.Config) *cobra.Command {
 			}
 			if moldfilePath == "" {
 				moldfilePath = path.Join(buildContext, "Dockerfile.mold")
+			}
+
+			_, err := docker.GetDockerClient()
+			if err != nil {
+				return err
 			}
 
 			moldfile, err := generator.GenerateMoldfile(dockerfilePath, buildContext)
