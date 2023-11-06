@@ -1,25 +1,41 @@
 package cli
 
 import (
+	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/tklab-group/forge/cli/config"
 	"github.com/tklab-group/forge/cli/mold"
+	"log/slog"
 	"os"
+	"path/filepath"
+	"time"
 )
+
+var logLevel string
 
 func newRootCmd(config config.Config) *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:   "forge",
 		Short: "", // TODO
-		Long:  "", // TODO
+		Long:  "", // TODO,
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			err := settingLog(logLevel)
+			if err != nil {
+				return err
+			}
+
+			return nil
+		},
 	}
 	rootCmd.SetIn(config.In)
 	rootCmd.SetOut(config.Out)
 	rootCmd.SetErr(config.Err)
-	
+
 	rootCmd.AddCommand(
 		mold.Cmd(config),
 	)
+
+	rootCmd.PersistentFlags().StringVarP(&logLevel, "log-level", "l", "info", `Set the logging level ("debug", "info", "warn", "error") (default "info")`)
 
 	return rootCmd
 }
@@ -35,6 +51,44 @@ func Execute() error {
 	if err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func settingLog(logLevelStr string) error {
+	logLevels := map[string]slog.Level{
+		"debug": slog.LevelDebug,
+		"info":  slog.LevelInfo,
+		"warn":  slog.LevelWarn,
+		"error": slog.LevelError,
+	}
+
+	level, ok := logLevels[logLevelStr]
+	if !ok {
+		return fmt.Errorf("unexpected log level: %s", logLevelStr)
+	}
+
+	replace := func(groups []string, a slog.Attr) slog.Attr {
+		// Format time.
+		if a.Key == slog.TimeKey && len(groups) == 0 {
+			t := a.Value.Time()
+			a.Value = slog.StringValue(t.Format(time.DateTime))
+		}
+		// Remove the directory from the source's filename.
+		if a.Key == slog.SourceKey {
+			source := a.Value.Any().(*slog.Source)
+			source.File = filepath.Base(source.File)
+		}
+		return a
+	}
+
+	l := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		AddSource:   true,
+		Level:       level,
+		ReplaceAttr: replace,
+	}))
+
+	slog.SetDefault(l)
 
 	return nil
 }
