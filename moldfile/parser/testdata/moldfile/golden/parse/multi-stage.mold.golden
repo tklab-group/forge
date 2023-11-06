@@ -134,7 +134,7 @@
                     platformFlag:   optional.Of[*github.com/tklab-group/forge/moldfile/parser.platformFlag]{},
                 },
                 &parser.otherInstruction{
-                    rawTextContainer: parser.rawTextContainer{rawText:"COPY --from=builder app\n"},
+                    rawTextContainer: parser.rawTextContainer{rawText:"COPY --from=builder app .\n"},
                 },
                 &parser.otherInstruction{
                     rawTextContainer: parser.rawTextContainer{rawText:"CMD [\"./app\"]"},

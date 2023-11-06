@@ -13,10 +13,21 @@ type MoldFile interface {
 	ToString() string
 	//TextDiff() string
 	//Diff() []string // TODO: Change the return value format
+
+	BuildStageCount() int
+	GetBuildStage(index int) (BuildStage, error)
 }
 
 type moldFile struct {
-	buildStages []*buildStage
+	buildStages []BuildStage
+}
+
+type BuildStage interface {
+	implBuildStage()
+	stringfy
+	ToString() string
+	GetFromInstruction() (FromInstruction, error)
+	UpdatePackageInfos(reference packageVersions)
 }
 
 type buildStage struct {
@@ -79,7 +90,7 @@ func ParseMoldFile(ior io.Reader) (MoldFile, error) {
 
 	}
 
-	buildStages := make([]*buildStage, 0)
+	buildStages := make([]BuildStage, 0)
 	current := make([]instruction, 0)
 
 	for _, istr := range instructions {
@@ -164,6 +175,49 @@ func (m *moldFile) ToString() string {
 	return m.toString()
 }
 
+func (m *moldFile) BuildStageCount() int {
+	return len(m.buildStages)
+}
+
+func (m *moldFile) GetBuildStage(index int) (BuildStage, error) {
+	actualCount := m.BuildStageCount()
+	if index >= actualCount {
+		return nil, fmt.Errorf("build stage counts is %d. Index %d is out of range", actualCount, index)
+	}
+
+	return m.buildStages[index], nil
+}
+
+func (b *buildStage) ToString() string {
+	return b.toString()
+}
+
+func (b *buildStage) GetFromInstruction() (FromInstruction, error) {
+	if len(b.instructions) == 0 {
+		return nil, fmt.Errorf("this build stage has no instruction")
+	}
+
+	firstIstr := b.instructions[0]
+	fromIstr, ok := firstIstr.(FromInstruction)
+	if !ok {
+		return nil, fmt.Errorf("expected first instruction is FromInstruction but %T", firstIstr)
+	}
+
+	return fromIstr, nil
+}
+
+func (b *buildStage) UpdatePackageInfos(reference packageVersions) {
+	for _, istr := range b.instructions {
+		runIstr, ok := istr.(RunInstruction)
+		if ok {
+			runIstr.UpdatePackageInfos(reference)
+		}
+	}
+
+}
+
 func (b *buildStage) toString() string {
 	return joinStringfys(b.instructions)
 }
+
+func (b *buildStage) implBuildStage() {}

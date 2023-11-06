@@ -3,6 +3,7 @@ package parser
 import (
 	"fmt"
 	"github.com/tklab-group/forge/util/optional"
+	"log/slog"
 	"strings"
 )
 
@@ -24,6 +25,22 @@ func parseAptPackageInfo(s string) packageInfo {
 			version: optional.Of[string]{},
 		}
 	}
+}
+
+func (a *aptPackageInfo) updatePackageInfo(reference packageVersions) {
+	aptPkgVersions, ok := reference["apt"]
+	if !ok {
+		slog.Warn("apt packages information not found")
+		return
+	}
+
+	version, ok := aptPkgVersions[a.name]
+	if !ok {
+		slog.Warn(fmt.Sprintf("version of package %s not found", a.name))
+	}
+
+	a.version = optional.NewWithValue(version)
+	slog.Debug(fmt.Sprintf("update package information: %s", a.toString()))
 }
 
 func (a *aptPackageInfo) toString() string {
