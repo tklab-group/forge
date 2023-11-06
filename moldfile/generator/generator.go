@@ -2,6 +2,8 @@ package generator
 
 import (
 	"fmt"
+	"github.com/docker/docker/client"
+	"github.com/tklab-group/forge/docker"
 	"github.com/tklab-group/forge/docker/image"
 	"github.com/tklab-group/forge/moldfile/parser"
 	"log/slog"
@@ -10,7 +12,20 @@ import (
 	"github.com/tklab-group/docker-image-disassembler/disassembler"
 )
 
+type generator struct {
+	dockerClient *client.Client
+}
+
 func GenerateMoldfile(dockerfilePath string, buildContext string) (parser.MoldFile, error) {
+	dockerClient, err := docker.GetDockerClient()
+	if err != nil {
+		return nil, err
+	}
+
+	g := &generator{
+		dockerClient: dockerClient,
+	}
+
 	slog.Info("reading Dockerfile")
 	dockerfile, err := os.Open(dockerfilePath)
 	if err != nil {
@@ -27,7 +42,7 @@ func GenerateMoldfile(dockerfilePath string, buildContext string) (parser.MoldFi
 	for i := 0; i < moldfile.BuildStageCount(); i++ {
 		slog.Info(fmt.Sprintf("molding build stage index=%d", i))
 
-		err = moldPerBuildStage(moldfile, buildContext, i)
+		err = g.moldPerBuildStage(moldfile, buildContext, i)
 		if err != nil {
 			return nil, fmt.Errorf("failed to mold build stage index=%d: %v", i, err)
 		}
@@ -38,14 +53,14 @@ func GenerateMoldfile(dockerfilePath string, buildContext string) (parser.MoldFi
 	return moldfile, nil
 }
 
-func moldPerBuildStage(moldFile parser.MoldFile, buildContext string, stageIndex int) error {
+func (g *generator) moldPerBuildStage(moldFile parser.MoldFile, buildContext string, stageIndex int) error {
 	target, err := moldFile.GetBuildStage(stageIndex)
 	if err != nil {
 		return fmt.Errorf("failed to get target BuildStage: %v", err)
 	}
 
 	slog.Info("molding base image")
-	err = moldBaseImage(target)
+	err = g.moldBaseImage(target)
 	if err != nil {
 		return fmt.Errorf("failed to mold base image: %v", err)
 	}
@@ -61,7 +76,7 @@ func moldPerBuildStage(moldFile parser.MoldFile, buildContext string, stageIndex
 	}
 
 	slog.Info("molding package versions")
-	err = moldPackageVersion(target, priorBuildStages, buildContext)
+	err = g.moldPackageVersion(target, priorBuildStages, buildContext)
 	if err != nil {
 		return fmt.Errorf("failed to mold package versions: %v", err)
 	}
@@ -69,7 +84,7 @@ func moldPerBuildStage(moldFile parser.MoldFile, buildContext string, stageIndex
 	return nil
 }
 
-func moldBaseImage(buildStage parser.BuildStage) error {
+func (g *generator) moldBaseImage(buildStage parser.BuildStage) error {
 	fromInstruction, err := buildStage.GetFromInstruction()
 	if err != nil {
 		return fmt.Errorf("failed to get FROM instruction: %v", err)
@@ -81,7 +96,7 @@ func moldBaseImage(buildStage parser.BuildStage) error {
 		return nil
 	}
 
-	latestDigest, err := image.GetLatestDigest(currentBaseImage)
+	latestDigest, err := image.GetLatestDigest(g.dockerClient, currentBaseImage)
 	if err != nil {
 		return fmt.Errorf("failed to get latest digest of `%s`: %v", currentBaseImage, latestDigest)
 	}
@@ -91,7 +106,7 @@ func moldBaseImage(buildStage parser.BuildStage) error {
 	return nil
 }
 
-func moldPackageVersion(buildStage parser.BuildStage, priorBuildStages []parser.BuildStage, buildContext string) error {
+func (g *generator) moldPackageVersion(buildStage parser.BuildStage, priorBuildStages []parser.BuildStage, buildContext string) error {
 	tmpDockerfile, err := os.CreateTemp("/tmp", "Dockerfile")
 	if err != nil {
 		return err

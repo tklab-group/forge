@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-func GetLatestDigest(imageName string) (digest string, err error) {
+func GetLatestDigest(dockerClient *client.Client, imageName string) (digest string, err error) {
 	if strings.Contains(imageName, "@") {
 		return strings.Split(imageName, "@")[1], nil
 	}
@@ -29,14 +29,8 @@ func GetLatestDigest(imageName string) (digest string, err error) {
 		tag = "latest"
 	}
 
-	// TODO: Consider how to treat client
-	client, err := client.NewClientWithOpts()
-	if err != nil {
-		return "", err
-	}
-
 	ctx := context.Background()
-	res, err := client.ImagePull(ctx, imageName, types.ImagePullOptions{})
+	res, err := dockerClient.ImagePull(ctx, imageName, types.ImagePullOptions{})
 	if err != nil {
 		return "", fmt.Errorf("failed to pull `%s`: %v", imageName, err)
 	}
@@ -49,7 +43,7 @@ func GetLatestDigest(imageName string) (digest string, err error) {
 	}
 
 	args := filters.NewArgs(filters.Arg("reference", repository))
-	imageSummaries, err := client.ImageList(ctx, types.ImageListOptions{
+	imageSummaries, err := dockerClient.ImageList(ctx, types.ImageListOptions{
 		All:     true,
 		Filters: args,
 	})
