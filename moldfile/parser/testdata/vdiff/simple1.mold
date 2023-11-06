@@ -1,0 +1,11 @@
+FROM ubuntu:20.04 as base
+
+RUN apt-get update && \
+    apt-get install -y wget=1.20.3-1ubuntu1
+RUN echo "test" >> test.txt
+
+FROM ubuntu:latest
+
+COPY --from=base test.txt .
+RUN apt-get update && \
+    apt-get install -y wget

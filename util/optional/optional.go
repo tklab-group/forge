@@ -1,5 +1,7 @@
 package optional
 
+import "encoding/json"
+
 type Of[T any] struct {
 	value T
 	valid bool
@@ -34,4 +36,8 @@ func (o Of[T]) HasValue() bool {
 func defaultValue[T any]() T {
 	v := new(T)
 	return *v
+}
+
+func (o Of[T]) MarshalJSON() ([]byte, error) {
+	return json.Marshal(o.ValueOrZero())
 }

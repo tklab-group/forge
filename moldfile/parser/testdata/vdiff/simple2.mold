@@ -1,0 +1,11 @@
+FROM ubuntu@sha256:ed4a42283d9943135ed87d4ee34e542f7f5ad9ecf2f244870e23122f703f91c2 as base
+
+RUN apt-get update && \
+    apt-get install -y wget=1.20.3-1ubuntu2
+RUN echo "test" >> test.txt
+
+FROM ubuntu@sha256:4c32aacd0f7d1d3a29e82bee76f892ba9bb6a63f17f9327ca0d97c3d39b9b0ee
+
+COPY --from=base test.txt .
+RUN apt-get update && \
+    apt-get install -y wget=1.21.3-1ubuntu1

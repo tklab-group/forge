@@ -467,6 +467,18 @@ func (ri *runInstruction) UpdatePackageInfos(reference packageVersions) {
 	}
 }
 
+func (ri *runInstruction) getPackageManagerCmds() []*packageManagerCmd {
+	list := make([]*packageManagerCmd, 0)
+	for _, element := range ri.elements {
+		pmc, ok := element.(*packageManagerCmd)
+		if ok {
+			list = append(list, pmc)
+		}
+	}
+
+	return list
+}
+
 func (ri *runInstruction) appendElement(element runInstructionElement) {
 	ri.elements = append(ri.elements, element)
 }

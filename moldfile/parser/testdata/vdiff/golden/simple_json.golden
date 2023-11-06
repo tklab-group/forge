@@ -1,0 +1,46 @@
+{
+  "BuildStages": [
+    {
+      "BaseImage": {
+        "Name": "ubuntu",
+        "Moldfile1": {
+          "Tag": "20.04",
+          "Digest": ""
+        },
+        "Moldfile2": {
+          "Tag": "",
+          "Digest": "sha256:ed4a42283d9943135ed87d4ee34e542f7f5ad9ecf2f244870e23122f703f91c2"
+        }
+      },
+      "Packages": [
+        {
+          "PackageManager": "apt",
+          "Name": "wget",
+          "Moldfile1": "1.20.3-1ubuntu1",
+          "Moldfile2": "1.20.3-1ubuntu2"
+        }
+      ]
+    },
+    {
+      "BaseImage": {
+        "Name": "ubuntu",
+        "Moldfile1": {
+          "Tag": "latest",
+          "Digest": ""
+        },
+        "Moldfile2": {
+          "Tag": "",
+          "Digest": "sha256:4c32aacd0f7d1d3a29e82bee76f892ba9bb6a63f17f9327ca0d97c3d39b9b0ee"
+        }
+      },
+      "Packages": [
+        {
+          "PackageManager": "apt",
+          "Name": "wget",
+          "Moldfile1": "",
+          "Moldfile2": "1.21.3-1ubuntu1"
+        }
+      ]
+    }
+  ]
+}
