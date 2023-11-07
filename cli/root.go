@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"github.com/spf13/cobra"
+	"github.com/tklab-group/forge/cli/check"
 	"github.com/tklab-group/forge/cli/config"
 	"github.com/tklab-group/forge/cli/mold"
 	"log/slog"
@@ -15,9 +16,10 @@ var logLevel string
 
 func newRootCmd(config config.Config) *cobra.Command {
 	rootCmd := &cobra.Command{
-		Use:   "forge",
-		Short: "", // TODO
-		Long:  "", // TODO,
+		Use:          "forge",
+		Short:        "", // TODO
+		Long:         "", // TODO,
+		SilenceUsage: true,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			err := settingLog(logLevel)
 			if err != nil {
@@ -33,6 +35,7 @@ func newRootCmd(config config.Config) *cobra.Command {
 
 	rootCmd.AddCommand(
 		mold.Cmd(config),
+		check.Cmd(config),
 	)
 
 	rootCmd.PersistentFlags().StringVarP(&logLevel, "log-level", "l", "info", `Set the logging level ("debug", "info", "warn", "error") (default "info")`)
