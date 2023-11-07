@@ -10,3 +10,5 @@ tasks:
   update-golden-test:
     desc: Update golden testing results
     cmd: go test -update -clean ./... -clean
+  build:
+    cmd: CGO_ENABLED=0 go build -o forge .

@@ -20,6 +20,7 @@ func newRootCmd(config config.Config) *cobra.Command {
 		Short:        "", // TODO
 		Long:         "", // TODO,
 		SilenceUsage: true,
+		Version:      "0.0.1",
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			err := settingLog(logLevel)
 			if err != nil {
