@@ -92,16 +92,22 @@ func ParseMoldFile(ior io.Reader) (MoldFile, error) {
 
 	buildStages := make([]BuildStage, 0)
 	current := make([]instruction, 0)
+	hasFromInstruction := false
 
 	for _, istr := range instructions {
 		_, isFromInstruction := istr.(*fromInstruction)
-		if isFromInstruction && len(current) != 0 {
-			currentStage := &buildStage{
-				instructions: current,
-			}
-			buildStages = append(buildStages, currentStage)
+		if isFromInstruction {
+			if len(current) != 0 && hasFromInstruction {
+				currentStage := &buildStage{
+					instructions: current,
+				}
+				buildStages = append(buildStages, currentStage)
 
-			current = make([]instruction, 0)
+				current = make([]instruction, 0)
+				hasFromInstruction = true
+			} else {
+				hasFromInstruction = true
+			}
 		}
 
 		current = append(current, istr)
@@ -192,18 +198,24 @@ func (b *buildStage) ToString() string {
 	return b.toString()
 }
 
+// GetFromInstruction returns the first FRomInstruction in the buildStage.
 func (b *buildStage) GetFromInstruction() (FromInstruction, error) {
+	return b.getFromInstruction()
+}
+
+func (b *buildStage) getFromInstruction() (*fromInstruction, error) {
 	if len(b.instructions) == 0 {
 		return nil, fmt.Errorf("this build stage has no instruction")
 	}
 
-	firstIstr := b.instructions[0]
-	fromIstr, ok := firstIstr.(FromInstruction)
-	if !ok {
-		return nil, fmt.Errorf("expected first instruction is FromInstruction but %T", firstIstr)
+	for _, istr := range b.instructions {
+		fromIstr, ok := istr.(*fromInstruction)
+		if ok {
+			return fromIstr, nil
+		}
 	}
 
-	return fromIstr, nil
+	return nil, fmt.Errorf("FROM instruction not found in the buildStage")
 }
 
 func (b *buildStage) UpdatePackageInfos(reference packageVersions) {

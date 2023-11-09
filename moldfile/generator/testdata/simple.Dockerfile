@@ -1,3 +1,4 @@
+# 1st build stage
 FROM ubuntu:20.04 as base
 
 RUN apt-get update && \

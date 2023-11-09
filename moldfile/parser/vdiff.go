@@ -95,17 +95,14 @@ func vdiffBaseImages(bs1 *buildStage, bs2 *buildStage) (VDiffBaseImage, error) {
 		return VDiffBaseImage{}, fmt.Errorf("BuildStage should have more than 0 instruction, but buildStage2 is 0")
 	}
 
-	// First instruction must be FromInstruction
-	istr1 := bs1.instructions[0]
-	fromInstruction1, ok := istr1.(*fromInstruction)
-	if !ok {
-		return VDiffBaseImage{}, fmt.Errorf("first instruction in BuildStage1 must be FromInstruction but %T", istr1)
+	fromInstruction1, err := bs1.getFromInstruction()
+	if err != nil {
+		return VDiffBaseImage{}, fmt.Errorf("failed to get FROM instruction from buildStage1: %v", err)
 	}
 
-	istr2 := bs2.instructions[0]
-	fromInstruction2, ok := istr2.(*fromInstruction)
-	if !ok {
-		return VDiffBaseImage{}, fmt.Errorf("first instruction in BuildStage2 must be FromInstruction but %T", istr2)
+	fromInstruction2, err := bs2.getFromInstruction()
+	if err != nil {
+		return VDiffBaseImage{}, fmt.Errorf("failed to get FROM instruction from buildStage2: %v", err)
 	}
 
 	imageInfo1 := fromInstruction1.imageInfo

@@ -26,6 +26,7 @@ func TestGenerateMoldfile(t *testing.T) {
 				buildContext:   "testdata",
 			},
 			wantRegexps: []string{
+				`# 1st build stage`,
 				`FROM ubuntu@sha256:\w+ as base`,
 				``,
 				`RUN apt-get update && \\`,
