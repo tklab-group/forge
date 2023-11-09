@@ -33,13 +33,9 @@ If FILE_PATH is "-", the file content is read from stdin.`,
 				r = f
 			}
 
-			moldfile, err := parser.ParseMoldFile(r)
+			_, err := parser.ParseMoldFile(r)
 			if err != nil {
 				return fmt.Errorf("failed to parse: %v", err)
-			}
-
-			if moldfile.BuildStageCount() == 0 {
-				return fmt.Errorf("unexpected parsing result. Is the file empty?")
 			}
 
 			_, err = fmt.Fprintln(cmd.OutOrStdout(), "ok")

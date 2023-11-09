@@ -6,6 +6,7 @@ import (
 	"github.com/tklab-group/forge/cli/check"
 	"github.com/tklab-group/forge/cli/config"
 	"github.com/tklab-group/forge/cli/mold"
+	"github.com/tklab-group/forge/cli/vdiff"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -37,6 +38,7 @@ func newRootCmd(config config.Config) *cobra.Command {
 	rootCmd.AddCommand(
 		mold.Cmd(config),
 		check.Cmd(config),
+		vdiff.Cmd(config),
 	)
 
 	rootCmd.PersistentFlags().StringVarP(&logLevel, "log-level", "l", "info", `Set the logging level ("debug", "info", "warn", "error") (default "info")`)
