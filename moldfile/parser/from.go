@@ -297,10 +297,8 @@ func (f *fromInstruction) toString() string {
 }
 
 func (i *imageInfo) toString() string {
-	if i.digest.HasValue() {
-		return strings.Join([]string{i.name, "@", i.digest.ValueOrZero()}, "")
-	} else if i.tag.HasValue() {
-		return strings.Join([]string{i.name, ":", i.tag.ValueOrZero()}, "")
+	if i.tag.HasValue() || i.digest.HasValue() {
+		return i.name + i.getTagOrDigest(true)
 	}
 
 	return i.name
@@ -312,6 +310,22 @@ func (i *imageInfo) updateWithDigest(digest string) {
 	}
 
 	i.digest = optional.NewWithValue(digest)
+}
+
+func (i *imageInfo) getTagOrDigest(setPrefix bool) string {
+	if i.tag.HasValue() {
+		if setPrefix {
+			return fmt.Sprintf(":%s", i.tag.ValueOrZero())
+		} else {
+			return i.tag.ValueOrZero()
+		}
+	} else {
+		if setPrefix {
+			return fmt.Sprintf("@%s", i.digest.ValueOrZero())
+		} else {
+			return i.digest.ValueOrZero()
+		}
+	}
 }
 
 func (b *buildStageInfo) toString() string {

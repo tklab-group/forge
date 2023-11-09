@@ -2,7 +2,6 @@ package parser
 
 import (
 	"fmt"
-	"github.com/tklab-group/forge/util/optional"
 	"log/slog"
 )
 
@@ -17,13 +16,8 @@ type VDiffBuildStage struct {
 
 type VDiffBaseImage struct {
 	Name      string
-	Moldfile1 VDiffBaseImageUnit
-	Moldfile2 VDiffBaseImageUnit
-}
-
-type VDiffBaseImageUnit struct {
-	Tag    optional.Of[string]
-	Digest optional.Of[string]
+	Moldfile1 string
+	Moldfile2 string
 }
 
 type VDiffPackageInfo struct {
@@ -113,15 +107,9 @@ func vdiffBaseImages(bs1 *buildStage, bs2 *buildStage) (VDiffBaseImage, error) {
 	}
 
 	return VDiffBaseImage{
-		Name: imageInfo1.name,
-		Moldfile1: VDiffBaseImageUnit{
-			Tag:    imageInfo1.tag,
-			Digest: imageInfo1.digest,
-		},
-		Moldfile2: VDiffBaseImageUnit{
-			Tag:    imageInfo2.tag,
-			Digest: imageInfo2.digest,
-		},
+		Name:      imageInfo1.name,
+		Moldfile1: imageInfo1.getTagOrDigest(true),
+		Moldfile2: imageInfo2.getTagOrDigest(true),
 	}, nil
 }
 
