@@ -6,25 +6,25 @@ import (
 )
 
 type VDiff struct {
-	BuildStages []VDiffBuildStage
+	BuildStages []VDiffBuildStage `json:"buildStages"`
 }
 
 type VDiffBuildStage struct {
-	BaseImage VDiffBaseImage
-	Packages  []VDiffPackageInfo
+	BaseImage VDiffBaseImage     `json:"baseImage"`
+	Packages  []VDiffPackageInfo `json:"packages"`
 }
 
 type VDiffBaseImage struct {
-	Name      string
-	Moldfile1 string
-	Moldfile2 string
+	Name      string `json:"name"`
+	Moldfile1 string `json:"moldfile1"`
+	Moldfile2 string `json:"moldfile2"`
 }
 
 type VDiffPackageInfo struct {
-	PackageManager string
-	Name           string
-	Moldfile1      string
-	Moldfile2      string
+	PackageManager string `json:"packageManager"`
+	Name           string `json:"name"`
+	Moldfile1      string `json:"moldfile1"`
+	Moldfile2      string `json:"moldfile2"`
 }
 
 func VDiffMoldfiles(moldfile1 MoldFile, moldfile2 MoldFile) (VDiff, error) {
