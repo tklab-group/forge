@@ -2,15 +2,16 @@ package cli
 
 import (
 	"fmt"
+	"log/slog"
+	"os"
+	"path/filepath"
+	"time"
+
 	"github.com/spf13/cobra"
 	"github.com/tklab-group/forge/cli/check"
 	"github.com/tklab-group/forge/cli/config"
 	"github.com/tklab-group/forge/cli/mold"
 	"github.com/tklab-group/forge/cli/vdiff"
-	"log/slog"
-	"os"
-	"path/filepath"
-	"time"
 )
 
 var logLevel string
@@ -21,7 +22,7 @@ func newRootCmd(config config.Config) *cobra.Command {
 		Short:        "", // TODO
 		Long:         "", // TODO,
 		SilenceUsage: true,
-		Version:      "0.0.1",
+		Version:      "0.0.2",
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			err := settingLog(logLevel)
 			if err != nil {
