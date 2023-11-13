@@ -6,9 +6,12 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/tklab-group/forge/cli/config"
 	"github.com/tklab-group/forge/moldfile/parser"
+	"io"
 	"log/slog"
 	"os"
 )
+
+var outputPath string
 
 func Cmd(config config.Config) *cobra.Command {
 	// TODO: Support other options of output format
@@ -44,7 +47,21 @@ func Cmd(config config.Config) *cobra.Command {
 				return err
 			}
 
-			_, err = fmt.Fprintln(cmd.OutOrStdout(), string(rawJson))
+			var w io.Writer
+			if outputPath != "" {
+				slog.Info(fmt.Sprintf("write output to %s", outputPath))
+				f, err := os.Create(outputPath)
+				if err != nil {
+					return err
+				}
+				defer f.Close()
+
+				w = f
+			} else {
+				w = cmd.OutOrStdout()
+			}
+
+			_, err = fmt.Fprintln(w, string(rawJson))
 			if err != nil {
 				return err
 			}
@@ -56,6 +73,8 @@ func Cmd(config config.Config) *cobra.Command {
 	cmd.SetIn(config.In)
 	cmd.SetOut(config.Out)
 	cmd.SetErr(config.Err)
+
+	cmd.Flags().StringVarP(&outputPath, "output", "o", "", " Write to a file, instead of stdout")
 
 	return cmd
 }
