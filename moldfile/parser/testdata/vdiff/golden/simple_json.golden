@@ -1,6 +1,7 @@
 {
   "buildStages": [
     {
+      "stageName": "base",
       "baseImage": {
         "name": "ubuntu",
         "moldfile1": ":20.04",
@@ -16,6 +17,7 @@
       ]
     },
     {
+      "stageName": "",
       "baseImage": {
         "name": "ubuntu",
         "moldfile1": ":latest",

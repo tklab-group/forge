@@ -10,6 +10,7 @@ type VDiff struct {
 }
 
 type VDiffBuildStage struct {
+	StageName string             `json:"stageName"`
 	BaseImage VDiffBaseImage     `json:"baseImage"`
 	Packages  []VDiffPackageInfo `json:"packages"`
 }
@@ -63,6 +64,11 @@ func vdiffBuildStages(buildStage1 BuildStage, buildStage2 BuildStage) (VDiffBuil
 	slog.Debug(fmt.Sprintf("instruction counts of buildStage1: %d", bs1.instructions))
 	slog.Debug(fmt.Sprintf("instruction counts of buildStage2: %d", bs2.instructions))
 
+	buildStageName, err := vdiffBuildStageName(bs1, bs1)
+	if err != nil {
+		return VDiffBuildStage{}, fmt.Errorf("faild to get build stage name: %v", err)
+	}
+
 	baseImage, err := vdiffBaseImages(bs1, bs2)
 	if err != nil {
 		return VDiffBuildStage{}, fmt.Errorf("failed to vdiff base images: %v", err)
@@ -74,9 +80,38 @@ func vdiffBuildStages(buildStage1 BuildStage, buildStage2 BuildStage) (VDiffBuil
 	}
 
 	return VDiffBuildStage{
+		StageName: buildStageName,
 		BaseImage: baseImage,
 		Packages:  packages,
 	}, nil
+}
+
+func vdiffBuildStageName(bs1 *buildStage, bs2 *buildStage) (string, error) {
+	if len(bs1.instructions) == 0 {
+		return "", fmt.Errorf("BuildStage should have more than 0 instruction, but buildStage1 is 0")
+	}
+	if len(bs2.instructions) == 0 {
+		return "", fmt.Errorf("BuildStage should have more than 0 instruction, but buildStage2 is 0")
+	}
+
+	fromInstruction1, err := bs1.getFromInstruction()
+	if err != nil {
+		return "", fmt.Errorf("failed to get FROM instruction from buildStage1: %v", err)
+	}
+
+	fromInstruction2, err := bs2.getFromInstruction()
+	if err != nil {
+		return "", fmt.Errorf("failed to get FROM instruction from buildStage2: %v", err)
+	}
+
+	var buildStageName string
+	if fromInstruction1.buildStageInfo.HasValue() {
+		buildStageName = fromInstruction1.buildStageInfo.ValueOrZero().name.toString()
+	} else if fromInstruction2.buildStageInfo.HasValue() {
+		buildStageName = fromInstruction2.buildStageInfo.ValueOrZero().name.toString()
+	}
+
+	return buildStageName, nil
 }
 
 func vdiffBaseImages(bs1 *buildStage, bs2 *buildStage) (VDiffBaseImage, error) {
