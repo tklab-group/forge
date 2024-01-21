@@ -37,6 +37,7 @@ func (a *aptPackageInfo) updatePackageInfo(reference packageVersions) {
 	version, ok := aptPkgVersions[a.name]
 	if !ok {
 		slog.Warn(fmt.Sprintf("version of package %s not found", a.name))
+		return
 	}
 
 	a.version = optional.NewWithValue(version)
