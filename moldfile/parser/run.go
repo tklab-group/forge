@@ -270,6 +270,19 @@ func (ri *runInstruction) parsePackageManagerCmd(r reader, buffer *bytes.Buffer,
 					return nil // Current command ends here
 				}
 
+				if isEndWithCommandSeparatorSemicolon(buffer.String()) {
+					suffixRemoved := strings.TrimSuffix(buffer.String(), ";")
+					if suffixRemoved != "" {
+						managerCmd.parseElement(suffixRemoved, packageInfoParser)
+					}
+
+					ri.appendElement(newCommandSeparatorSemicolon(";"))
+					buffer.Reset()
+
+					ri.appendElement(newSpaceFromByte(b))
+					return nil // Current command ends here
+				}
+
 				managerCmd.parseElement(buffer.String(), packageInfoParser)
 			}
 
@@ -286,6 +299,19 @@ func (ri *runInstruction) parsePackageManagerCmd(r reader, buffer *bytes.Buffer,
 
 				noStrInCurrentLine = true
 				continue
+			}
+
+			if isEndWithCommandSeparatorSemicolon(buffer.String()) {
+				suffixRemoved := strings.TrimSuffix(buffer.String(), ";")
+				if suffixRemoved != "" {
+					managerCmd.parseElement(suffixRemoved, packageInfoParser)
+				}
+
+				ri.appendElement(newCommandSeparatorSemicolon(";"))
+				buffer.Reset()
+
+				managerCmd.appendElement(newNewlineCharFromByte(b))
+				return nil // Current command ends here
 			}
 
 			managerCmd.parseElement(buffer.String(), packageInfoParser)
@@ -383,9 +409,11 @@ func (ri *runInstruction) parseOtherCmd(r reader, buffer *bytes.Buffer, currentB
 
 				if isEndWithCommandSeparatorSemicolon(buffer.String()) {
 					lastCmdStr := strings.TrimSuffix(buffer.String(), ";")
-					_, err = builder.WriteString(lastCmdStr)
-					if err != nil {
-						return err
+					if lastCmdStr != "" {
+						_, err = builder.WriteString(lastCmdStr)
+						if err != nil {
+							return err
+						}
 					}
 
 					cmd := &otherCmd{newRawTextContainer(builder.String())}

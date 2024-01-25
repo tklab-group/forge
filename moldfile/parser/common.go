@@ -80,7 +80,7 @@ type commandSeparatorSemicolon struct {
 }
 
 func isEndWithCommandSeparatorSemicolon(s string) bool {
-	match, _ := regexp.MatchString(`^\w+;$`, s)
+	match, _ := regexp.MatchString(`^\w*;$`, s)
 	return match
 }
 

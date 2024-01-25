@@ -64,120 +64,6 @@
                 },
                 &parser.packageManagerArg{
                     packageInfo: &parser.aptPackageInfo{
-                        name:    "bzip2",
-                        version: optional.Of[string]{},
-                    },
-                },
-                &parser.space{
-                    rawTextContainer: parser.rawTextContainer{rawText:" "},
-                },
-                &parser.backslash{
-                    rawTextContainer: parser.rawTextContainer{rawText:"\\"},
-                },
-                &parser.newlineChar{
-                    rawTextContainer: parser.rawTextContainer{rawText:"\n"},
-                },
-                &parser.space{
-                    rawTextContainer: parser.rawTextContainer{rawText:"\t"},
-                },
-                &parser.space{
-                    rawTextContainer: parser.rawTextContainer{rawText:"\t"},
-                },
-                &parser.packageManagerArg{
-                    packageInfo: &parser.aptPackageInfo{
-                        name:    "unzip",
-                        version: optional.Of[string]{},
-                    },
-                },
-                &parser.space{
-                    rawTextContainer: parser.rawTextContainer{rawText:" "},
-                },
-                &parser.backslash{
-                    rawTextContainer: parser.rawTextContainer{rawText:"\\"},
-                },
-                &parser.newlineChar{
-                    rawTextContainer: parser.rawTextContainer{rawText:"\n"},
-                },
-                &parser.space{
-                    rawTextContainer: parser.rawTextContainer{rawText:"\t"},
-                },
-                &parser.space{
-                    rawTextContainer: parser.rawTextContainer{rawText:"\t"},
-                },
-                &parser.packageManagerArg{
-                    packageInfo: &parser.aptPackageInfo{
-                        name:    "xz-utils",
-                        version: optional.Of[string]{},
-                    },
-                },
-                &parser.space{
-                    rawTextContainer: parser.rawTextContainer{rawText:" "},
-                },
-                &parser.backslash{
-                    rawTextContainer: parser.rawTextContainer{rawText:"\\"},
-                },
-                &parser.newlineChar{
-                    rawTextContainer: parser.rawTextContainer{rawText:"\n"},
-                },
-                &parser.space{
-                    rawTextContainer: parser.rawTextContainer{rawText:"\t"},
-                },
-                &parser.space{
-                    rawTextContainer: parser.rawTextContainer{rawText:"\t"},
-                },
-                &parser.packageManagerArg{
-                    packageInfo: &parser.aptPackageInfo{
-                        name:    "binutils",
-                        version: optional.Of[string]{},
-                    },
-                },
-                &parser.space{
-                    rawTextContainer: parser.rawTextContainer{rawText:" "},
-                },
-                &parser.backslash{
-                    rawTextContainer: parser.rawTextContainer{rawText:"\\"},
-                },
-                &parser.newlineChar{
-                    rawTextContainer: parser.rawTextContainer{rawText:"\n"},
-                },
-                &parser.space{
-                    rawTextContainer: parser.rawTextContainer{rawText:"\t"},
-                },
-                &parser.space{
-                    rawTextContainer: parser.rawTextContainer{rawText:"\t"},
-                },
-                &parser.packageManagerArg{
-                    packageInfo: &parser.aptPackageInfo{
-                        name:    "fontconfig",
-                        version: optional.Of[string]{},
-                    },
-                },
-                &parser.space{
-                    rawTextContainer: parser.rawTextContainer{rawText:" "},
-                },
-                &parser.packageManagerArg{
-                    packageInfo: &parser.aptPackageInfo{
-                        name:    "libfreetype6",
-                        version: optional.Of[string]{},
-                    },
-                },
-                &parser.space{
-                    rawTextContainer: parser.rawTextContainer{rawText:" "},
-                },
-                &parser.backslash{
-                    rawTextContainer: parser.rawTextContainer{rawText:"\\"},
-                },
-                &parser.newlineChar{
-                    rawTextContainer: parser.rawTextContainer{rawText:"\n"},
-                },
-                &parser.space{
-                    rawTextContainer: parser.rawTextContainer{rawText:"\t"},
-                },
-                &parser.space{
-                    rawTextContainer: parser.rawTextContainer{rawText:"\t"},
-                },
-                &parser.packageManagerArg{
-                    packageInfo: &parser.aptPackageInfo{
                         name:    "ca-certificates",
                         version: optional.Of[string]{},
                     },
@@ -203,45 +89,6 @@
                 &parser.space{
                     rawTextContainer: parser.rawTextContainer{rawText:"\t"},
                 },
-                &parser.packageManagerArg{
-                    packageInfo: &parser.aptPackageInfo{
-                        name:    ";",
-                        version: optional.Of[string]{},
-                    },
-                },
-                &parser.space{
-                    rawTextContainer: parser.rawTextContainer{rawText:" "},
-                },
-                &parser.backslash{
-                    rawTextContainer: parser.rawTextContainer{rawText:"\\"},
-                },
-                &parser.newlineChar{
-                    rawTextContainer: parser.rawTextContainer{rawText:"\n"},
-                },
-                &parser.space{
-                    rawTextContainer: parser.rawTextContainer{rawText:"\t"},
-                },
-                &parser.packageManagerArg{
-                    packageInfo: &parser.aptPackageInfo{
-                        name:    "rm",
-                        version: optional.Of[string]{},
-                    },
-                },
-                &parser.space{
-                    rawTextContainer: parser.rawTextContainer{rawText:" "},
-                },
-                &parser.packageManagerOption{
-                    rawTextContainer: parser.rawTextContainer{rawText:"-rf"},
-                },
-                &parser.space{
-                    rawTextContainer: parser.rawTextContainer{rawText:" "},
-                },
-                &parser.packageManagerArg{
-                    packageInfo: &parser.aptPackageInfo{
-                        name:    "/var/lib/apt/lists/*",
-                        version: optional.Of[string]{},
-                    },
-                },
             },
             mainCmd: &parser.packageManagerMainCmd{
                 rawTextContainer: parser.rawTextContainer{rawText:"apt-get"},
@@ -258,35 +105,8 @@
                 &parser.packageManagerOption{
                     rawTextContainer: parser.rawTextContainer{rawText:"--no-install-recommends"},
                 },
-                &parser.packageManagerOption{
-                    rawTextContainer: parser.rawTextContainer{rawText:"-rf"},
-                },
             },
             packages: {
-                &parser.aptPackageInfo{
-                    name:    "bzip2",
-                    version: optional.Of[string]{},
-                },
-                &parser.aptPackageInfo{
-                    name:    "unzip",
-                    version: optional.Of[string]{},
-                },
-                &parser.aptPackageInfo{
-                    name:    "xz-utils",
-                    version: optional.Of[string]{},
-                },
-                &parser.aptPackageInfo{
-                    name:    "binutils",
-                    version: optional.Of[string]{},
-                },
-                &parser.aptPackageInfo{
-                    name:    "fontconfig",
-                    version: optional.Of[string]{},
-                },
-                &parser.aptPackageInfo{
-                    name:    "libfreetype6",
-                    version: optional.Of[string]{},
-                },
                 &parser.aptPackageInfo{
                     name:    "ca-certificates",
                     version: optional.Of[string]{},
@@ -295,19 +115,25 @@
                     name:    "p11-kit",
                     version: optional.Of[string]{},
                 },
-                &parser.aptPackageInfo{
-                    name:    ";",
-                    version: optional.Of[string]{},
-                },
-                &parser.aptPackageInfo{
-                    name:    "rm",
-                    version: optional.Of[string]{},
-                },
-                &parser.aptPackageInfo{
-                    name:    "/var/lib/apt/lists/*",
-                    version: optional.Of[string]{},
-                },
             },
+        },
+        &parser.commandSeparatorSemicolon{
+            rawTextContainer: parser.rawTextContainer{rawText:";"},
+        },
+        &parser.space{
+            rawTextContainer: parser.rawTextContainer{rawText:" "},
+        },
+        &parser.backslash{
+            rawTextContainer: parser.rawTextContainer{rawText:"\\"},
+        },
+        &parser.newlineChar{
+            rawTextContainer: parser.rawTextContainer{rawText:"\n"},
+        },
+        &parser.space{
+            rawTextContainer: parser.rawTextContainer{rawText:"\t"},
+        },
+        &parser.otherCmd{
+            rawTextContainer: parser.rawTextContainer{rawText:"rm -rf /var/lib/apt/lists/*"},
         },
     },
     runString: &parser.runString{
