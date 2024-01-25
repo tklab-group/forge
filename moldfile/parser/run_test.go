@@ -1,13 +1,14 @@
 package parser
 
 import (
+	"os"
+	"path"
+	"testing"
+
 	"github.com/kr/pretty"
 	"github.com/sebdah/goldie/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"os"
-	"path"
-	"testing"
 )
 
 const runTestDataDir = "testdata/run"
@@ -51,8 +52,14 @@ func TestParseRunInstruction(t *testing.T) {
 			err:      nil,
 		},
 		{
-			name:     "multiple commands with &&",
+			name:     "multiple commands with `&&`",
 			fileName: "multiple-commands.mold",
+			isError:  false,
+			err:      nil,
+		},
+		{
+			name:     "multiple commands with `;`",
+			fileName: "multiple-commands-using-semicolon.mold",
 			isError:  false,
 			err:      nil,
 		},
@@ -124,8 +131,12 @@ func Test_runInstruction_ToString(t *testing.T) {
 			fileName: "curl-multiline.mold",
 		},
 		{
-			name:     "multiple commands with &&",
+			name:     "multiple commands with `&&`",
 			fileName: "multiple-commands.mold",
+		},
+		{
+			name:     "multiple commands with `;`",
+			fileName: "multiple-commands-using-semicolon.mold",
 		},
 		{
 			name:     "apt command ends with newline",

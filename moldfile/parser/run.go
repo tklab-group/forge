@@ -381,6 +381,23 @@ func (ri *runInstruction) parseOtherCmd(r reader, buffer *bytes.Buffer, currentB
 					return nil // Current command ends here
 				}
 
+				if isEndWithCommandSeparatorSemicolon(buffer.String()) {
+					lastCmdStr := strings.TrimSuffix(buffer.String(), ";")
+					_, err = builder.WriteString(lastCmdStr)
+					if err != nil {
+						return err
+					}
+
+					cmd := &otherCmd{newRawTextContainer(builder.String())}
+					ri.appendElement(cmd)
+
+					ri.appendElement(newCommandSeparatorSemicolon(";"))
+					buffer.Reset()
+					ri.appendElement(newSpaceFromByte(b))
+
+					return nil // Current command ends here
+				}
+
 				_, err = builder.WriteString(buffer.String())
 				if err != nil {
 					return err
@@ -512,14 +529,15 @@ func (p *packageManagerArg) toString() string {
 func (ri *runInstruction) implInstruction()    {}
 func (ri *runInstruction) implRunInstruction() {}
 
-func (r *runString) implRunInstructionElement()         {}
-func (p *packageManagerCmd) implRunInstructionElement() {}
-func (o *otherCmd) implRunInstructionElement()          {}
-func (c *comment) implRunInstructionElement()           {}
-func (s *space) implRunInstructionElement()             {}
-func (n *newlineChar) implRunInstructionElement()       {}
-func (b *backslash) implRunInstructionElement()         {}
-func (c *commandSeparator) implRunInstructionElement()  {}
+func (r *runString) implRunInstructionElement()                 {}
+func (p *packageManagerCmd) implRunInstructionElement()         {}
+func (o *otherCmd) implRunInstructionElement()                  {}
+func (c *comment) implRunInstructionElement()                   {}
+func (s *space) implRunInstructionElement()                     {}
+func (n *newlineChar) implRunInstructionElement()               {}
+func (b *backslash) implRunInstructionElement()                 {}
+func (c *commandSeparator) implRunInstructionElement()          {}
+func (c *commandSeparatorSemicolon) implRunInstructionElement() {}
 
 func (p *packageManagerMainCmd) implPackageManagerCmdElement() {}
 func (p *packageManagerOption) implPackageManagerCmdElement()  {}
