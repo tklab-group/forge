@@ -2,6 +2,7 @@ package parser
 
 import (
 	"bytes"
+	"regexp"
 	"slices"
 	"strings"
 )
@@ -70,6 +71,21 @@ func isCommandSeparator(s string) bool {
 
 func newCommandSeparator(s string) *commandSeparator {
 	return &commandSeparator{
+		newRawTextContainer(s),
+	}
+}
+
+type commandSeparatorSemicolon struct {
+	rawTextContainer
+}
+
+func isEndWithCommandSeparatorSemicolon(s string) bool {
+	match, _ := regexp.MatchString(`^\w+;$`, s)
+	return match
+}
+
+func newCommandSeparatorSemicolon(s string) *commandSeparatorSemicolon {
+	return &commandSeparatorSemicolon{
 		newRawTextContainer(s),
 	}
 }

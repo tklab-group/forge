@@ -1,0 +1,11 @@
+RUN set -eux; \
+	apt-get update; \
+	apt-get install -y --no-install-recommends \
+		bzip2 \
+		unzip \
+		xz-utils \
+		binutils \
+		fontconfig libfreetype6 \
+		ca-certificates p11-kit \
+	; \
+	rm -rf /var/lib/apt/lists/*
