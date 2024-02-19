@@ -56,7 +56,55 @@ For version pinning of packages, it currently supports only packages installed v
 forge vdiff FILE_PATH1 FILE_PATH2 [flags]
 ```
 
-Extract version differences between two files (Moldfile/Dockerfile).
+Extract specified version differences between two files (Moldfile/Dockerfile).
+
+It only supports comparison between the same structure instruction files.
+It is expected to use for Dockerfile and Moldfile generated from the Dockerfile, or Moldfiles generated from the same Dockerfile.
+
+<details>
+<summary>Example</summary>
+
+Moldfile1:
+```Dockerfile
+FROM ubuntu@sha256:ed4a42283d9943135ed87d4ee34e542f7f5ad9ecf2f244870e23122f703f91c2
+
+RUN apt-get update && apt-get install -y \
+    wget=1.20.3-1ubuntu2
+```
+
+Moldfile2:
+
+```Dockerfile
+FROM ubuntu@sha256:4c32aacd0f7d1d3a29e82bee76f892ba9bb6a63f17f9327ca0d97c3d39b9b0ee
+
+RUN apt-get update && apt-get install -y \
+    wget=1.21.3-1ubuntu1
+```
+
+Output:
+```json
+{
+  "buildStages": [
+    {
+      "stageName": "",
+      "baseImage": {
+        "name": "ubuntu",
+        "moldfile1": "@sha256:ed4a42283d9943135ed87d4ee34e542f7f5ad9ecf2f244870e23122f703f91c2",
+        "moldfile2": "@sha256:4c32aacd0f7d1d3a29e82bee76f892ba9bb6a63f17f9327ca0d97c3d39b9b0ee"
+      },
+      "packages": [
+        {
+          "packageManager": "apt",
+          "name": "wget",
+          "moldfile1": "1.20.3-1ubuntu2",
+          "moldfile2": "1.21.3-1ubuntu1"
+        }
+      ]
+    }
+  ]
+}
+```
+</details>
 
 ### `check`
 ```shell
