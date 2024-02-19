@@ -6,6 +6,34 @@ TODO: GIF
 
 ## What is Moldfile?
 
+Moldfile is a Dockerfile compatible file format proposed in [CDCM](https://github.com/tklab-group/CDCM).
+It strictly records versions of all dependencies in Dockerfile, e.g. base image and packages, and provides high configuration reproducibility.
+Its recommended file name is `Moldfile` or `Dockerfile.mold`.
+
+### Dockerfile
+For writing Dockerfile, developers usually use loose version specification.
+`latest` or a meaningful named tag for a base image and no version specification for installing packages in RUN instructions.
+It provides high readability and maintainability.
+
+```Dockerfile
+FROM ubuntu:latest
+
+RUN apt-get update && apt-get install -y \
+    curl
+```
+
+### Moldfile
+Moldfile is generated from Dockerfile and pins versions of all dependencies.
+Digest for a base image and version pinning for packages.
+It provides high configuration reproducibility for building Docker image and records the configuration at the time of its generation.
+
+```Dockerfile
+FROM ubuntu@sha256:e6173d4dc55e76b87c4af8db8821b1feae4146dd47341e4d431118c7dd060a74
+
+RUN apt-get update && apt-get install -y \
+    curl=7.81.0-1ubuntu1.15
+```
+
 ## Usage
 
 > [!WARNING]
