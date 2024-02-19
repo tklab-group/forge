@@ -16,13 +16,14 @@ import (
 
 var logLevel string
 
+var version string
+
 func newRootCmd(config config.Config) *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:          "forge",
-		Short:        "", // TODO
-		Long:         "", // TODO,
+		Short:        "",
 		SilenceUsage: true,
-		Version:      "v0.0.5",
+		Version:      version,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			err := settingLog(logLevel)
 			if err != nil {
@@ -45,6 +46,10 @@ func newRootCmd(config config.Config) *cobra.Command {
 	rootCmd.PersistentFlags().StringVarP(&logLevel, "log-level", "l", "info", `Set the logging level ("debug", "info", "warn", "error") (default "info")`)
 
 	return rootCmd
+}
+
+func SetVersion(v string) {
+	version = v
 }
 
 func Execute() error {
