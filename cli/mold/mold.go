@@ -2,12 +2,13 @@ package mold
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
-	"github.com/tklab-group/forge/cli/config"
-	"github.com/tklab-group/forge/moldfile/generator"
 	"log/slog"
 	"os"
 	"path"
+
+	"github.com/spf13/cobra"
+	"github.com/tklab-group/forge/cli/config"
+	"github.com/tklab-group/forge/moldfile/generator"
 )
 
 var dockerfilePath string
@@ -16,8 +17,8 @@ var moldfilePath string
 func Cmd(config config.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "mold PATH",
-		Short: `Generate moldfile.`,
-		Long:  `Generate moldfile from existing Dockerfile and build context. Using PATH as build context.`,
+		Short: `Generate Moldfile.`,
+		Long:  `Generate Moldfile from existing Dockerfile and build context. Using PATH as build context.`,
 		Args:  cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			buildContext := args[0]
