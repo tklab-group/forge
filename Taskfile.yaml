@@ -12,10 +12,3 @@ tasks:
     cmd: go test -update -clean ./... -clean
   build:
     cmd: CGO_ENABLED=0 go build -o forge .
-  get-disassembler:
-    desc: Update docker-image-disassembler imports (required while it is private repository)
-    env:
-      GOPRIVATE: github.com/tklab-group
-    cmds: 
-      - go get github.com/tklab-group/docker-image-disassembler@main
-      - go mod tidy
