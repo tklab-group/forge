@@ -8,6 +8,8 @@ github.com/Microsoft/go-winio v0.6.1 h1:9/kr64B9VUZrLm5YYwbGtUJnMgqWVOdUAXu6Migc
 github.com/Microsoft/go-winio v0.6.1/go.mod h1:LRdKpFKfdobln8UmuiYcKPot9D2v6svN5+sAH+4kjUM=
 github.com/Microsoft/hcsshim v0.10.0-rc.8 h1:YSZVvlIIDD1UxQpJp0h+dnpLUw+TrY0cx8obKsp3bek=
 github.com/Microsoft/hcsshim v0.10.0-rc.8/go.mod h1:OEthFdQv/AD2RAdzR6Mm1N1KPCztGKDurW1Z8b8VGMM=
+github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7lmo=
+github.com/agext/levenshtein v1.2.3/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/cncf/udpa/go v0.0.0-20191209042840-269d4d468f6f/go.mod h1:M8M6+tZqaGXZJjfX53e64911xZQV5JYwmTeXPW+k8Sc=
@@ -160,6 +162,10 @@ github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcU
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 github.com/tklab-group/docker-image-disassembler v0.0.0-20231031012406-24b59bf1f89a h1:jhqrELs22EHsnr3z1HiqwZSAX7e54F0Y+XXvYjXIEvE=
 github.com/tklab-group/docker-image-disassembler v0.0.0-20231031012406-24b59bf1f89a/go.mod h1:KCE7QyueZgeDioU44IBhfMIFrpzes2JWuCN+GH8XaTU=
+github.com/tklab-group/docker-image-disassembler v0.0.2 h1:W60dltfbEXinKGsxLrGdOnV5oHXDVRhCvG6Ckhw4Es0=
+github.com/tklab-group/docker-image-disassembler v0.0.2/go.mod h1:KCE7QyueZgeDioU44IBhfMIFrpzes2JWuCN+GH8XaTU=
+github.com/tklab-group/docker-image-disassembler v1.0.0 h1:Ac1l/hAvh6ohxImNT56tgWIuQw2+3l2ObcPm81NxbDc=
+github.com/tklab-group/docker-image-disassembler v1.0.0/go.mod h1:KCE7QyueZgeDioU44IBhfMIFrpzes2JWuCN+GH8XaTU=
 github.com/urfave/cli v1.22.4/go.mod h1:Gos4lmkARVdJ6EkW0WaNv/tZAAMe9V7XWyB60NtXRu0=
 github.com/vbatts/tar-split v0.11.2 h1:Via6XqJr0hceW4wff3QRzD5gAk/tatMw/4ZA7cTlIME=
 github.com/vbatts/tar-split v0.11.2/go.mod h1:vV3ZuO2yWSVsz+pfFzDG/upWH1JhjOiEaWq6kXyQ3VI=

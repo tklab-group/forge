@@ -9,12 +9,13 @@ require (
 	github.com/sebdah/goldie/v2 v2.5.3
 	github.com/spf13/cobra v1.7.0
 	github.com/stretchr/testify v1.8.4
-	github.com/tklab-group/docker-image-disassembler v0.0.0-20231031012406-24b59bf1f89a
+	github.com/tklab-group/docker-image-disassembler v1.0.0
 )
 
 require (
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/Microsoft/hcsshim v0.10.0-rc.8 // indirect
+	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/containerd/cgroups v1.1.0 // indirect
 	github.com/containerd/containerd v1.7.2 // indirect
 	github.com/containerd/continuity v0.4.1 // indirect
