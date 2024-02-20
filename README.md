@@ -1,5 +1,8 @@
 # forge
 
+![GitHub Release](https://img.shields.io/github/v/release/tklab-group/forge)
+![GitHub License](https://img.shields.io/github/license/tklab-group/forge)
+
 `forge` is a CLI tool for generating Moldfile from Dockerfile.
 
 ![](./assets/demo.gif)
