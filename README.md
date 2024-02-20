@@ -2,7 +2,7 @@
 
 `forge` is a CLI tool for generating Moldfile from Dockerfile.
 
-TODO: GIF
+![](./assets/demo.gif)
 
 ## What is Moldfile?
 
