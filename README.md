@@ -122,7 +122,7 @@ If FILE_PATH is "-", the file content is read from stdin.
 ### Go tools
 
 ```shell
-go install github.com/tklab-group/docker-image-forge@latest
+go install github.com/tklab-group/forge@latest
 ```
 
 ### Binary
