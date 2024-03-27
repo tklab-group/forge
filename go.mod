@@ -9,7 +9,7 @@ require (
 	github.com/sebdah/goldie/v2 v2.5.3
 	github.com/spf13/cobra v1.7.0
 	github.com/stretchr/testify v1.8.4
-	github.com/tklab-group/docker-image-disassembler v1.1.0
+	github.com/tklab-group/docker-image-disassembler v1.1.1
 )
 
 require (
