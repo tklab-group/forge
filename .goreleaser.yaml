@@ -6,7 +6,7 @@ builds:
     goos:
       - linux
       - windows
-      # - darwin
+      - darwin
     ldflags: -s -w -X main.version={{.Version}}
 
 archives:
