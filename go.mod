@@ -1,6 +1,6 @@
 module github.com/tklab-group/forge
 
-go 1.21.1
+go 1.21
 
 require (
 	github.com/docker/docker v23.0.10+incompatible
