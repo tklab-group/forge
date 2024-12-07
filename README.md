@@ -39,11 +39,6 @@ RUN apt-get update && apt-get install -y \
 
 ## Usage
 
-> [!WARNING]
-> Currently it doesn't support new Docker image format.
->
-> Use `forge` with Docker Engine older version than `v25.0`.
-
 ### `mold`
 ```shell
 forge mold PATH [flags]
